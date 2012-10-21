@@ -1,0 +1,13 @@
+{application, popcorn,
+ [
+  {description, "Popcorn log monitor"},
+  {vsn, "0.0.1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { popcorn_app, []}},
+  {env, []}
+ ]}.
+

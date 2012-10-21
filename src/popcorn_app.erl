@@ -1,0 +1,17 @@
+-module(popcorn_app).
+
+-behaviour(application).
+
+%% Application callbacks
+-export([start/2, stop/1]).
+
+%% ===================================================================
+%% Application callbacks
+%% ===================================================================
+
+start(_StartType, _StartArgs) ->
+    popcorn_sup:start_link().
+
+stop(_State) ->
+    ok.
+
