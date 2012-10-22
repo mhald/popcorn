@@ -44,7 +44,12 @@ handle_cast(_Msg, State) ->
 
 
 handle_info({udp, Socket, _Host, _Port, Bin}, State) ->
-  	io:format("Bin = ~p\n", [Bin]),
+    {Node, Severity, Message} = decode_protobuffs_message(Bin),
+
+    Tags = get_tags(binary_to_list(Message)),
+
+    io:format("Node = ~p, Message = ~p\n, Tags = ~p\n", [Node, Message, Tags]),
+
     inet:setopts(Socket, [{active, once}]),
     {noreply, State};
 
@@ -59,4 +64,23 @@ terminate(_Reason, _State) ->
 
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
+
+
+get_tags(Message) ->
+    Tags_List = lists:filter(fun(Word) ->
+          string:substr(Word, 1, 1) =:= "#"
+      end, string:tokens(Message, " ")),
+    Cleaned_Tags = lists:map(fun(Word) ->
+          string:substr(Word, 2, length(Word) - 1)
+      end, Tags_List),
+    string:join(Cleaned_Tags, ",").
+
+decode_protobuffs_message(Encoded_Message) ->
+    {{1, Node},     Rest1} = protobuffs:decode(Encoded_Message, bytes),
+    {{2, Severity}, Rest2} = protobuffs:decode(Rest1,           bytes),
+    {{3, Message},  <<>>}  = protobuffs:decode(Rest2,           bytes),
+
+    {Node, Severity, Message}.
+
+
 
