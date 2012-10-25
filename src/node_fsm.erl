@@ -66,7 +66,12 @@ init([]) ->
                                        role                  = Role}};
 
 'LOGGING'(get_message_counts, _From, State) ->
-    {reply, [], 'LOGGING', State}.
+    Severity_Counts = lists:map(fun({Severity, Metric_Name}) ->
+                          {lager_util:num_to_level(Severity), folsom_metrics:get_metric_value(Metric_Name)}
+                        end, State#state.severity_metric_names),
+    Total_Count     = lists:foldl(fun({_, Count}, Total) -> Total + Count end, 0, Severity_Counts),
+
+    {reply, Severity_Counts ++ [{total, Total_Count}], 'LOGGING', State}.
 
 handle_event(Event, StateName, State)                 -> {stop, {StateName, undefined_event, Event}, State}.
 handle_sync_event(Event, _From, StateName, State)     -> {stop, {StateName, undefined_event, Event}, State}.
