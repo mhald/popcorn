@@ -8,10 +8,12 @@
 %% Supervisor callbacks
 -export([init/1]).
 
+%% Helper macro for declaring children of supervisor
+-define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
+
 %% ===================================================================
 %% API functions
 %% ===================================================================
-
 
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
@@ -21,14 +23,5 @@ start_link() ->
 %% ===================================================================
 
 init([]) ->
-    Children = [
-                {popcorn_server, 
-                 {popcorn_server, start_link, []},
-                 permanent, 5000, worker, [popcorn_server]},
-
-                {popcorn_udp,
-                 {popcorn_udp, start_link, []},
-                  permanent, 5000, worker, [popcorn_udp]}
-               ],
-    {ok, { {one_for_one, 10000, 10}, Children} }.
+    {ok, { {one_for_one, 5, 10}, []} }.
 

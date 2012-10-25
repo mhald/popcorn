@@ -4,7 +4,7 @@
 
 -define(to_int(Value), list_to_integer(binary_to_list(Value))).
 
--include("popcorn.hrl").
+-include("include/popcorn.hrl").
 
 %% ------------------------------------------------------------------
 %% API Function Exports
@@ -31,8 +31,9 @@ start_link() ->
 %% ------------------------------------------------------------------
 -record(state, {socket}).
 
-init([]) ->
-    {ok, Socket} = gen_udp:open(9125, [binary, {active, once}, {recbuf, 524288}]),
+init(Params) ->
+    {ok, Udp_Listen_Port} = application:get_env(popcorn, udp_listen_port),
+    {ok, Socket} = gen_udp:open(Udp_Listen_Port, [binary, {active, once}, {recbuf, 524288}]),
 
     {ok, #state{socket = Socket}}.
 
@@ -44,11 +45,23 @@ handle_cast(_Msg, State) ->
 
 
 handle_info({udp, Socket, _Host, _Port, Bin}, State) ->
-    {Node, Severity, Message} = decode_protobuffs_message(Bin),
+    {Node, Node_Role, Node_Version, Severity, Message} = decode_protobuffs_message(Bin),
 
-    Tags = get_tags(binary_to_list(Message)),
+    %% create the node fsm, if necessary
+    case ets:select_count(current_nodes, [{{'$1', '$2'}, [{'=:=', '$1', Node}], [true]}]) of
+        0 -> {ok, Pid} = supervisor:start_child(node_sup, []),
+             ok = gen_fsm:sync_send_event(Pid, {set_node_name, Node, Node_Role}),
+             ets:insert(current_nodes, {Node, Pid});
+        _ -> ok
+    end,
 
-    io:format("Node = ~p, Message = ~p\n, Tags = ~p\n", [Node, Message, Tags]),
+    %% let the fsm create the log
+    case ets:lookup(current_nodes, Node) of
+        []                 -> ?POPCORN_WARN_MSG("unable to find fsm for node ~p", [Node]);
+        [{_, Running_Pid}] -> gen_fsm:send_event(Running_Pid, {log_message, Node, Node_Role, Node_Version, Severity, Message})
+    end,
+
+    %%Tags = get_tags(binary_to_list(Message)),
 
     inet:setopts(Socket, [{active, once}]),
     {noreply, State};
@@ -76,11 +89,11 @@ get_tags(Message) ->
     string:join(Cleaned_Tags, ",").
 
 decode_protobuffs_message(Encoded_Message) ->
-    {{1, Node},     Rest1} = protobuffs:decode(Encoded_Message, bytes),
-    {{2, Severity}, Rest2} = protobuffs:decode(Rest1,           bytes),
-    {{3, Message},  <<>>}  = protobuffs:decode(Rest2,           bytes),
+    {{1, Node},     Rest1}     = protobuffs:decode(Encoded_Message, bytes),
+    {{2, Node_Role}, Rest2}    = protobuffs:decode(Rest1,           bytes),
+    {{3, Node_Version}, Rest3} = protobuffs:decode(Rest2,           bytes),
+    {{4, Severity}, Rest4}     = protobuffs:decode(Rest3,           bytes),
+    {{5, Message},  <<>>}      = protobuffs:decode(Rest4,           bytes),
 
-    {Node, Severity, Message}.
-
-
+    {Node, Node_Role, Node_Version, Severity, Message}.
 
