@@ -27,10 +27,11 @@ init([]) ->
     io:format("Starting http listener..."),
     {ok, Http_Listen_Port} = application:get_env(popcorn, http_listen_port),
     Http_Dispatch = [{'_', [
-                            {[<<"js">>, '...'], http_static_handler, []},
-                            {[<<"css">>, '...'], http_static_handler, []},
+                            {[<<"js">>, '...'],     http_static_handler, []},
+                            {[<<"css">>, '...'],    http_static_handler, []},
                             {[<<"images">>, '...'], http_static_handler, []},
-                            {'_', http_handler, []}
+                            {[<<"node">>, '_', <<"log">>, '...'],   http_node_log_handler, []},
+                            {'_',                   http_catchall_handler, []}
                            ]}],
 
     cowboy:start_http(http_handler, 100, [{port, Http_Listen_Port}], [{dispatch, Http_Dispatch}]),

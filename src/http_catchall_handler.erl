@@ -1,4 +1,4 @@
--module(http_handler).
+-module(http_catchall_handler).
 -author('marc.e.campbell@gmail.com').
 
 -behavior(cowboy_http_handler).
@@ -8,30 +8,6 @@
 -export([init/3,
          handle/2,
          terminate/2]).
-
--spec try_start_authed_session(string(), string(), string()) -> {error, string()} | {ok, any()}.
--spec is_session_authed_and_valid(any()) -> true | false.
-
-try_start_authed_session(IP_Address, Username, Password) ->
-    {ok, Pid} = supervisor:start_child(connected_user_sup, []),
-    case connected_user_fsm:try_auth_visit(Pid, IP_Address, Username, Password) of
-        false -> gen_fsm:send_all_state_event(Pid, destroy),
-                 {error, "Invalid Login"};
-        true  -> Session_Key = gen_fsm:sync_send_event(Pid, get_session_key),
-                 ets:insert(current_connected_users, {Session_Key, Pid}),
-                 {ok, Session_Key}
-    end.
-
-is_session_authed_and_valid(Req) ->
-    {Session_Key, _} = cowboy_req:cookie(<<"popcorn-session-key">>, Req),
-    case Session_Key of
-        undefined -> false;
-        _         -> io:format("Session_Key = ~p\n", [Session_Key]),
-                     case ets:lookup(current_connected_users, Session_Key) of
-                         [] -> false;
-                         _  -> true
-                     end
-    end.
 
 init({_Any, http}, Req, _) -> {ok, Req, undefined_state}.
 
@@ -56,7 +32,7 @@ handle(Req, State) ->
             Username = proplists:get_value(<<"username">>, Post_Vals),
             Password = proplists:get_value(<<"password">>, Post_Vals),
 
-            case try_start_authed_session("", Username, Password) of
+            case session_handler:try_start_authed_session("", Username, Password) of
                 {error, Message}  -> {ok, Reply} = cowboy_req:reply(401, [], Message, Req),
                                      {ok, Reply, State};
                 {ok, Session_Key} -> Req1 = cowboy_req:set_resp_cookie(<<"popcorn-session-key">>, Session_Key, [{path, "/"}], Req),
@@ -66,12 +42,12 @@ handle(Req, State) ->
 
         {{<<"GET">>, _}, {<<"/">>, _}} ->
             ?POPCORN_DEBUG_MSG("http request for dashboard"),
-            case is_session_authed_and_valid(Req) of
+            case session_handler:is_session_authed_and_valid(Req) of
                 false -> Req1 = cowboy_req:set_resp_cookie(<<"popcorn-session-key">>, <<>>, [{path, "/"}], Req),
-                         {ok, Reply}  = cowboy_req:reply(301, [{"Location", "/login"}], [], Req1),
+                         {ok, Reply} = cowboy_req:reply(301, [{"Location", "/login"}], [], Req1),
                          {ok, Reply, State};
-                true  -> Output = dashboard:render(),
-                         {ok, Reply}  = cowboy_req:reply(200, [], Output, Req),
+                true  -> Output = mustache:render(view_dashboard),
+                         {ok, Reply} = cowboy_req:reply(200, [], Output, Req),
                          {ok, Reply, State}
             end;
 
