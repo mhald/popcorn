@@ -1,0 +1,37 @@
+* Overview
+  Popcorn is a log aggregator and analyzer for your server logs. Its
+  purpose is to provide a single interface where you can see what's 
+  going on in your code, what's happening with your servers and quickly 
+  detect problems caused by changes.
+
+* Features
+  - Send logs in realtime using UDP, don't block your running app  
+  - Data encoded using protocol buffers for efficiency  
+  - Log messages are categorized by node, node type, node version, 
+    severity and date
+  - Easily connect your app log messages from many platforms with 
+    available clients
+
+* Configuration
+  Add popcorn as a dependency to an existing Erlang/OTP app by 
+  adding a reference in the rebar.config file.
+
+  Your app should supply a configuration for popcorn, which includes 
+  the user authentication policy.  Possible options in the config are:
+
+#+BEGIN EXAMPLE
+  {popcorn, [
+        {udp_listen_port, 9125},
+        {http_listen_port, 9125},
+        {http_auth_enabled, true},
+        {http_auth_db_type, config},
+        {http_auth_users, [{<<"log_user">>, <<"log_password">>}]}
+        ]} 
+#+END EXAMPLE
+
+* Accessing
+  By default, the server will listen on port 9125 (both UDP and HTTP), 
+  so after running, visit http://{host}:9125 and you should see a login 
+  screen.  
+
+
