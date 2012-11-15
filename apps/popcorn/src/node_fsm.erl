@@ -108,17 +108,20 @@ init([]) ->
     Sep       = <<"_">>,
     Node_Name = State#state.node_name,
 
-    Hours_Ago    = lists:seq(0, 23),
-    Metric_Names = lists:map(fun(Hour) -> binary_to_atom(<<Prefix/binary, Sep/binary, Node_Name/binary, Sep/binary, SeverityB/binary, Sep/binary, Hour/binary>>, latin1) end, popcorn_util:last_24_hours()),
+		Hours_Ago     = lists:seq(0, 23),
+    Metric_Names  = lists:map(fun(Hour) -> HourB = list_to_binary(Hour), binary_to_atom(<<Prefix/binary, Sep/binary, Node_Name/binary, Sep/binary, SeverityB/binary, Sep/binary, HourB/binary>>, latin1) end, popcorn_util:last_24_hours()),
+		Time_And_Name = lists:zip(Hours_Ago, Metric_Names),
 
-    Values = lists:map(fun(Metric_Name) ->
-                 case folsom_metrics:metric_exists(Metric_Name) of
-                     false -> 0;
-                     true  -> folsom_metrics:get_metric_value(Metric_Name)
-                 end
-               end, Metric_Names),
+    Values = lists:map(fun({Hour_Ago, Metric_Name}) ->
+                 Value = case folsom_metrics:metric_exists(Metric_Name) of
+                             false -> 0;
+                      			 true  -> folsom_metrics:get_metric_value(Metric_Name)
+                 				 end,
+								 [{'hours_ago', 0 - Hour_Ago},
+									{'count',     Value}]
+               end, Time_And_Name),
 
-    {reply, lists:zip(Hours_Ago, Values), 'LOGGING', State}.
+    {reply, Values, 'LOGGING', State}.
 
 handle_event(Event, StateName, State)                 -> {stop, {StateName, undefined_event, Event}, State}.
 handle_sync_event(Event, _From, StateName, State)     -> {stop, {StateName, undefined_event, Event}, State}.

@@ -67,13 +67,76 @@
 
                 <!-- Graph
                 ================================================== -->
-                <section id="forms">
+                <section id="graphs">
                   <div class="sub-header">
                     <h2>Debug Events</h2>
                   </div>
                   <div class="row-fluid row-fluid-alternate-bg">
                     <div class="span12">
-                        <div id="mainChart"></div>
+                        <div id="debugChart"></div>
+                    </div>
+									</div>
+
+									<div class="sub-header">
+                    <h2>Info Events</h2>
+                  </div>
+                  <div class="row-fluid row-fluid-alternate-bg">
+                    <div class="span12">
+                        <div id="infoChart"></div>
+                    </div>
+									</div>
+
+									<div class="sub-header">
+                    <h2>Notice Events</h2>
+                  </div>
+                  <div class="row-fluid row-fluid-alternate-bg">
+                    <div class="span12">
+                        <div id="noticeChart"></div>
+                    </div>
+									</div>
+
+									<div class="sub-header">
+                    <h2>Warn Events</h2>
+                  </div>
+                  <div class="row-fluid row-fluid-alternate-bg">
+                    <div class="span12">
+                        <div id="warnChart"></div>
+                    </div>
+									</div>
+
+									<div class="sub-header">
+                    <h2>Error Events</h2>
+                  </div>
+                  <div class="row-fluid row-fluid-alternate-bg">
+                    <div class="span12">
+                        <div id="errorChart"></div>
+                    </div>
+									</div>
+
+									<div class="sub-header">
+                    <h2>Critical Events</h2>
+                  </div>
+                  <div class="row-fluid row-fluid-alternate-bg">
+                    <div class="span12">
+                        <div id="criticalChart"></div>
+                    </div>
+									</div>
+
+									<div class="sub-header">
+                    <h2>Alert Events</h2>
+                  </div>
+                  <div class="row-fluid row-fluid-alternate-bg">
+                    <div class="span12">
+                        <div id="alertChart"></div>
+                    </div>
+									</div>
+
+									<div class="sub-header">
+                    <h2>Emergency Events</h2>
+                  </div>
+                  <div class="row-fluid row-fluid-alternate-bg">
+                    <div class="span12">
+                        <div id="emergencyChart"></div>
                     </div>
                   </div>
                 </section>
@@ -124,12 +187,23 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-    <script src="js/highcharts.js"></script>
-    <script src="js/dashboard.js"></script>
-    <script src="bootstrap/js/bootstrap-dropdown.js"></script>
-    <script src="bootstrap/js/bootstrap-collapse.js"></script>
+    <script src="/js/highcharts.js"></script>
+    <script src="/bootstrap/js/bootstrap-dropdown.js"></script>
+    <script src="/bootstrap/js/bootstrap-collapse.js"></script>
 
 
+		<script type="text/javascript">
+			// graphs
+		  new Highcharts.Chart({chart:{renderTo:"debugChart",defaultSeriesType:"spline",height:250,plotBorderColor:"#e3e6e8",plotBorderWidth:1,plotBorderRadius:0,backgroundColor:"",spacingLeft:0,plotBackgroundColor:"#FFFFFF",marginTop:5,marginBottom:35,zoomType:"x,y"},credits:{style:{color:"#9fa2a5"}},title:{text:""},legend:{align:"left",floating:true,verticalAlign:"top",borderWidth:0,y:3,x:10,itemStyle:{fontSize:"11px",color:"#1E1E1E"}},yAxis:{title:{text:""},gridLineColor:"#FAFAFA",opposite:true,labels:{style:{color:"#9fa2a5"}}},xAxis:{type:"datetime",lineWidth:0,maxZoom:24*3600*1e3,tickInterval:3600*1e3,labels:{formatter:function(){return""},x:0,style:{color:"#9fa2a5"}}},plotOptions:{series:{marker:{lineWidth:1,radius:4},lineWidth:3,shadow:false}},colors:["#52d74c"],series:[{pointStart:Date.UTC(2012,11,15),pointInterval:3600*1e3,name:"Debug",marker:{symbol:"circle"},data:[{{#debug_event_counts}} {{count}}, {{/debug_event_counts}}]}]});
+      new Highcharts.Chart({chart:{renderTo:"infoChart",defaultSeriesType:"spline",height:250,plotBorderColor:"#e3e6e8",plotBorderWidth:1,plotBorderRadius:0,backgroundColor:"",spacingLeft:0,plotBackgroundColor:"#FFFFFF",marginTop:5,marginBottom:35,zoomType:"x,y"},credits:{style:{color:"#9fa2a5"}},title:{text:""},legend:{align:"left",floating:true,verticalAlign:"top",borderWidth:0,y:3,x:10,itemStyle:{fontSize:"11px",color:"#1E1E1E"}},yAxis:{title:{text:""},gridLineColor:"#FAFAFA",opposite:true,labels:{style:{color:"#9fa2a5"}}},xAxis:{type:"datetime",lineWidth:0,maxZoom:24*3600*1e3,tickInterval:3600*1e3,labels:{formatter:function(){return""},x:0,style:{color:"#9fa2a5"}}},plotOptions:{series:{marker:{lineWidth:1,radius:4},lineWidth:3,shadow:false}},colors:["#52d74c"],series:[{pointStart:Date.UTC(2012,11,15),pointInterval:3600*1e3,name:"Info",marker:{symbol:"circle"},data:[{{#info_event_counts}} {{count}}, {{/info_event_counts}}]}]});
+			new Highcharts.Chart({chart:{renderTo:"noticeChart",defaultSeriesType:"spline",height:250,plotBorderColor:"#e3e6e8",plotBorderWidth:1,plotBorderRadius:0,backgroundColor:"",spacingLeft:0,plotBackgroundColor:"#FFFFFF",marginTop:5,marginBottom:35,zoomType:"x,y"},credits:{style:{color:"#9fa2a5"}},title:{text:""},legend:{align:"left",floating:true,verticalAlign:"top",borderWidth:0,y:3,x:10,itemStyle:{fontSize:"11px",color:"#1E1E1E"}},yAxis:{title:{text:""},gridLineColor:"#FAFAFA",opposite:true,labels:{style:{color:"#9fa2a5"}}},xAxis:{type:"datetime",lineWidth:0,maxZoom:24*3600*1e3,tickInterval:3600*1e3,labels:{formatter:function(){return""},x:0,style:{color:"#9fa2a5"}}},plotOptions:{series:{marker:{lineWidth:1,radius:4},lineWidth:3,shadow:false}},colors:["#52d74c"],series:[{pointStart:Date.UTC(2012,11,15),pointInterval:3600*1e3,name:"Notice",marker:{symbol:"circle"},data:[{{#notice_event_counts}} {{count}}, {{/notice_event_counts}}]}]});
+			new Highcharts.Chart({chart:{renderTo:"warnChart",defaultSeriesType:"spline",height:250,plotBorderColor:"#e3e6e8",plotBorderWidth:1,plotBorderRadius:0,backgroundColor:"",spacingLeft:0,plotBackgroundColor:"#FFFFFF",marginTop:5,marginBottom:35,zoomType:"x,y"},credits:{style:{color:"#9fa2a5"}},title:{text:""},legend:{align:"left",floating:true,verticalAlign:"top",borderWidth:0,y:3,x:10,itemStyle:{fontSize:"11px",color:"#1E1E1E"}},yAxis:{title:{text:""},gridLineColor:"#FAFAFA",opposite:true,labels:{style:{color:"#9fa2a5"}}},xAxis:{type:"datetime",lineWidth:0,maxZoom:24*3600*1e3,tickInterval:3600*1e3,labels:{formatter:function(){return""},x:0,style:{color:"#9fa2a5"}}},plotOptions:{series:{marker:{lineWidth:1,radius:4},lineWidth:3,shadow:false}},colors:["#52d74c"],series:[{pointStart:Date.UTC(2012,11,15),pointInterval:3600*1e3,name:"Warn",marker:{symbol:"circle"},data:[{{#warn_event_counts}} {{count}}, {{/warn_event_counts}}]}]});
+			new Highcharts.Chart({chart:{renderTo:"errorChart",defaultSeriesType:"spline",height:250,plotBorderColor:"#e3e6e8",plotBorderWidth:1,plotBorderRadius:0,backgroundColor:"",spacingLeft:0,plotBackgroundColor:"#FFFFFF",marginTop:5,marginBottom:35,zoomType:"x,y"},credits:{style:{color:"#9fa2a5"}},title:{text:""},legend:{align:"left",floating:true,verticalAlign:"top",borderWidth:0,y:3,x:10,itemStyle:{fontSize:"11px",color:"#1E1E1E"}},yAxis:{title:{text:""},gridLineColor:"#FAFAFA",opposite:true,labels:{style:{color:"#9fa2a5"}}},xAxis:{type:"datetime",lineWidth:0,maxZoom:24*3600*1e3,tickInterval:3600*1e3,labels:{formatter:function(){return""},x:0,style:{color:"#9fa2a5"}}},plotOptions:{series:{marker:{lineWidth:1,radius:4},lineWidth:3,shadow:false}},colors:["#52d74c"],series:[{pointStart:Date.UTC(2012,11,15),pointInterval:3600*1e3,name:"Error",marker:{symbol:"circle"},data:[{{#error_event_counts}} {{count}}, {{/error_event_counts}}]}]});
+			new Highcharts.Chart({chart:{renderTo:"criticalChart",defaultSeriesType:"spline",height:250,plotBorderColor:"#e3e6e8",plotBorderWidth:1,plotBorderRadius:0,backgroundColor:"",spacingLeft:0,plotBackgroundColor:"#FFFFFF",marginTop:5,marginBottom:35,zoomType:"x,y"},credits:{style:{color:"#9fa2a5"}},title:{text:""},legend:{align:"left",floating:true,verticalAlign:"top",borderWidth:0,y:3,x:10,itemStyle:{fontSize:"11px",color:"#1E1E1E"}},yAxis:{title:{text:""},gridLineColor:"#FAFAFA",opposite:true,labels:{style:{color:"#9fa2a5"}}},xAxis:{type:"datetime",lineWidth:0,maxZoom:24*3600*1e3,tickInterval:3600*1e3,labels:{formatter:function(){return""},x:0,style:{color:"#9fa2a5"}}},plotOptions:{series:{marker:{lineWidth:1,radius:4},lineWidth:3,shadow:false}},colors:["#52d74c"],series:[{pointStart:Date.UTC(2012,11,15),pointInterval:3600*1e3,name:"Critical",marker:{symbol:"circle"},data:[{{#critical_event_counts}} {{count}}, {{/critical_event_counts}}]}]});
+			new Highcharts.Chart({chart:{renderTo:"alertChart",defaultSeriesType:"spline",height:250,plotBorderColor:"#e3e6e8",plotBorderWidth:1,plotBorderRadius:0,backgroundColor:"",spacingLeft:0,plotBackgroundColor:"#FFFFFF",marginTop:5,marginBottom:35,zoomType:"x,y"},credits:{style:{color:"#9fa2a5"}},title:{text:""},legend:{align:"left",floating:true,verticalAlign:"top",borderWidth:0,y:3,x:10,itemStyle:{fontSize:"11px",color:"#1E1E1E"}},yAxis:{title:{text:""},gridLineColor:"#FAFAFA",opposite:true,labels:{style:{color:"#9fa2a5"}}},xAxis:{type:"datetime",lineWidth:0,maxZoom:24*3600*1e3,tickInterval:3600*1e3,labels:{formatter:function(){return""},x:0,style:{color:"#9fa2a5"}}},plotOptions:{series:{marker:{lineWidth:1,radius:4},lineWidth:3,shadow:false}},colors:["#52d74c"],series:[{pointStart:Date.UTC(2012,11,15),pointInterval:3600*1e3,name:"Alert",marker:{symbol:"circle"},data:[{{#alert_event_counts}} {{count}}, {{/alert_event_counts}}]}]});
+			new Highcharts.Chart({chart:{renderTo:"emergencyChart",defaultSeriesType:"spline",height:250,plotBorderColor:"#e3e6e8",plotBorderWidth:1,plotBorderRadius:0,backgroundColor:"",spacingLeft:0,plotBackgroundColor:"#FFFFFF",marginTop:5,marginBottom:35,zoomType:"x,y"},credits:{style:{color:"#9fa2a5"}},title:{text:""},legend:{align:"left",floating:true,verticalAlign:"top",borderWidth:0,y:3,x:10,itemStyle:{fontSize:"11px",color:"#1E1E1E"}},yAxis:{title:{text:""},gridLineColor:"#FAFAFA",opposite:true,labels:{style:{color:"#9fa2a5"}}},xAxis:{type:"datetime",lineWidth:0,maxZoom:24*3600*1e3,tickInterval:3600*1e3,labels:{formatter:function(){return""},x:0,style:{color:"#9fa2a5"}}},plotOptions:{series:{marker:{lineWidth:1,radius:4},lineWidth:3,shadow:false}},colors:["#52d74c"],series:[{pointStart:Date.UTC(2012,11,15),pointInterval:3600*1e3,name:"Emergency",marker:{symbol:"circle"},data:[{{#emergency_event_counts}} {{count}}, {{/emergency_event_counts}}]}]});
+
+	  </script>
   </body>
 </html>
 
