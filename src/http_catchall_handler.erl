@@ -52,7 +52,7 @@ handle(Req, State) ->
             end;
 
         {{Method, _}, {Path, _}} ->
-            ?POPCORN_DEBUG_MSG("not implemented http request: ~p, ~p", [Method, Path]),
+            ?POPCORN_DEBUG_MSG("not implemented in catchall http request: ~p, ~p", [Method, Path]),
             {ok, Reply} = cowboy_req:reply(405, [], <<>>, Req),
             {ok, Reply, State}
     end.

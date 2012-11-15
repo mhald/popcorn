@@ -47,10 +47,10 @@
                          <h2>Node Overview</h2>
                      </header>
                      <div class="stat-body">
-                         <table class="table table-bordered table-striped sortable">
+                         <table class="log-table">
                              <thead>
                                  <tr>
-                                     <th class="header">Timestamp</th>
+                                     <th class="header">Time</th>
                                      <th class="header">Severity</th>
                                      <th class="header">Message</th>
                                  </tr>
@@ -59,12 +59,20 @@
                                  {{#log_messages}}
                                  <tr>
                                      <td style="max-width:240px;overflow:hidden;">
-                                         <div style="float:left;margin-top:4px;">
+                                         <div style="float:left;margin-top:4px;" class="date-sm">
                                              {{time}}
                                          </div>
                                      </td>
-                                     <td style="text-align: center; width: 80px;">{{message_severity}}</td>
-                                     <td style="text-align: left;">{{message}}</td>
+                                     <td style="text-align: center; width: 80px;">
+                                         <div class="severity-sm">
+                                             {{message_severity}}
+                                         </div>
+                                     </div>
+                                     <td style="text-align: left;">
+                                         <div class="message-sm">
+                                             {{message}}
+                                         </div>
+                                     </td>
                                  </tr>
                                  {{/log_messages}}
                              </tbody>

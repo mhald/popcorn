@@ -1,4 +1,4 @@
-$(function() {
+$(document).ready(function() {
   $('#login-btn').click(function() {
     $.ajax({type:'POST',url:'/api/v1/login',data:$('#login-form').serialize(),
             success:function(data, textStatus, xhr) {

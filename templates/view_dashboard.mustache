@@ -2,100 +2,358 @@
 <html>
     <head>
         <title>Popcorn Log Analysis</title>
-		    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600,700' rel='stylesheet' type='text/css'>
-        <link href="/css/popcorn.css" rel="stylesheet" type="text/css">
-        <link href="/css/bootstrap.css" rel="stylesheet" type="text/css">
+        <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600,700' rel='stylesheet' type='text/css'>
+        <link rel='stylesheet/less' href="/css/popcorn.less" type="text/css">
+        <script src="/js/less.js" type="text/javascript"></script>
         <link href="/css/jquery-ui.css" rel="stylesheet" type="text/css">
     </head>
     <body>
-        <div class="pri-nav-bg">
-            <div class="pri-nav">
-                <a href="/"><div class="sm-logo"></div></a>
-                <div class="nav-items">
-                    <ul class="nav-ul">
-      			            <li><a href="/" class="nav-item nav-item-home sel"></a></li>
-			                  <li><a href="/trending" class="nav-item nav-item-trending"></a></li>
-						            <li><a href="/raw" class="nav-item nav-item-raw"></a></li>
-			                  <li><a href="/settings" class="nav-item nav-item-settings"></a></li>
-        			      </ul>
-    			      </div>
-			      </div>
-		    </div>
-        <div class="filter-bg">
-    		    <div class="filter-container" id="filter-selection-display" style="">
-        		    <ul class="filter-ul" id="filter-ul">
-            		    <li class="subject-node" id="subject-node">
-                		    <div class="logo">
-                    		    <img id="subject-node-img" class="subject-node-img" src="/images/server.png" height="28" width="28">
-							              <div class="overlap logo-gloss">
-                    		    </div>
-                		    </div>
-                		    <h1 id="subject-name">All Nodes</h1>
-            		    </li>
-        			      <li class="filter-item">
-                        <a href="#">All Data</a>
-					          </li>
-				        </ul>
-    		    </div>
-        </div>
-        <div class="container" style="margin-top: 130px;">
-          <div style="clear: both">
+
+    <!-- Navbar
+      ================================================== -->
+    <div class="navbar navbar-static-top navbar-inverse">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+
+          <a class="brand" href="#">Popcorn</a>
+          <span class="tagline">a predictive & intelligent log analysis machine</span>
+
+          <div class="nav-collapse collapse" id="main-menu">
+            <div class="auth pull-right">
+                <img class="avatar" src="images/littke.png">
+                <span class="name">{{username}}</span><br/>
+                <span class="links">
+                    <a href="/settings">Settings</a>
+                    <a href="/logout">Logout</a>
+                </span>
+            </div>
           </div>
-          <div class="main-container">
-          <div class="stat-widget" style="width: 960px; float: left;">
-              <header>
-                  <h2>Node Overview</h2>
-              </header>
-             <div class="stat-body">
-                 <table class="table table-bordered table-striped sortable">
-                     <thead>
-                         <tr>
-                             <th class="header">Node</th>
-                             <th class="header">Total Messages</th>
-                             <th class="header">Debug</th>
-                             <th class="header">Info</th>
-                             <th class="header">Notice</th>
-						                 <th class="header">Warning</th>
-                             <th class="header">Error</th>
-							               <th class="header">Critical</th>
-                             <th class="header">Alert</th>
-							               <th class="header">Emergency</th>
-                         </tr>
-                     </thead>
-                     <tbody>
-                         {{#known_nodes}}
-                            <tr>
-                                <td style="max-width:240px;overflow:hidden;">
-                                  <div style="float:left;margin-top:4px;">
-                                    <a href="/node/{{node_name}}">{{node_name}}</a>
-                                  </div>
-                                </td>
-                                <td style="text-align: center; width: 80px;"><a href="/node/{{node_name}}/log">{{total_messages}}</a></td>
-                                <td style="text-align: center; width: 80px;"><a href="/node/{{node_name}}/log/debug">{{debug_messages}}</a></td>
-                                <td style="text-align: center; width: 80px;"><a href="/node/{{node_name}}/log/info">{{info_messages}}</a></td>
-                                <td style="text-align: center; width: 80px;"><a href="/node/{{node_name}}/log/notice">{{notice_messages}}</a></td>
-                                <td style="text-align: center; width: 80px;" class="yellow"><a href="/node/{{node_name}}/log/warning">{{warning_messages}}</a></td>
-                                <td style="text-align: center; width: 80px;" class="green"><a href="/node/{{node_name}}/log/error">{{error_messages}}</a></td>
-                                <td style="text-align: center; width: 80px" class="red"><a href="/node/{{node_name}}/log/critical">{{critical_messages}}</a></td>
-                                <td style="text-align: center; width: 80px;" class="red"><a href="/node/{{node_name}}/log/alert">{{alert_messages}}</a></td>
-                                <td style="text-align: center; width: 80px;" class="green"><a href="/node/{{node_name}}/log/emergency">{{emergency_messages}}</a></td>
-                            </tr>
-                         {{/known_nodes}}
-                     </tbody>
-                 </table>
-             </div>
         </div>
-        <div class="clear"></div>
+      </div>
+    </div>
 
-        <footer style="margin: 0 auto; width: 990px; margin-top: 30px; text-align: right; color: #555;">
-            <p><a href="http://github.com/marccampbell/popcorn">Get your own popcorn!</a></p>
-        </footer>
+    <div class="container">
+        <div class="row-fluid">
+            <div class="span3">
+                <aside>
+                    <nav>
+                        <ul class="nav">
+                          <li class="selected">
+                            <a href="/"><i class="icon-play"></i> Dashboard</a>
+                          </li>
+                          <li>
+                            <a href="/search"><i class="icon-th-list icon-white"></i> Search</a>
+                          </li>
+                          <li>
+                            <a href="/alerts"><i class="icon-font icon-white"></i> Alerts</a>
+                          </li>
+                          <li>
+                            <a href="/roles"><i class="icon-user icon-white"></i> Roles</a>
+                          </li>
+                          <li>
+                            <a href="/nodes"><i class="icon-retweet icon-white"></i> Nodes</a>
+                          </li>
+                        </ul>
+                    </nav>
+                </aside>
+            </div>
+            <div class="span9" id="content-wrapper">
+                <div id="content">
 
-        <script src="/js/jquery.custom.scrollbar.js" type="text/javascript"></script>
-        <script src="/js/jquery.mousewheel.min.js" type="text/javascript"></script>
-        <script src="/js/jquery.tablesorter.min.js" type="text/javascript"></script>
-        <script src="/js/jquery.history.js" type="text/javascript"></script>
-        <script src="/js/jquery.ba-bbq.min.js" type="text/javascript"></script>
-        <script src="/js/bootstrap.min.js" type="text/javascript"></script>
-    </body>
+                    <!-- Navbar
+                    ================================================== -->
+                    <section id="stats">
+                      <header>
+                        <div class="pull-right">
+                            <a class="btn btn-small">Filter</a>
+                        </div>
+                        <h1>Dashboard</h1>
+                      </header>
+                      <div class="row-fluid">
+                        <div class="span2">
+                            <div class="kpi">{{node_count}}</div>
+                            <div><small>nodes</small></div>
+                        </div>
+                        <div class="span2">
+                            <div class="kpi">{{event_count}}</div>
+                            <div><small>events</small></div>
+                    </div>
+                    <div class="span2">
+                        <div class="kpi">{{hashtag_count}}</div>
+                        <div><small>#hashtags</small></div>
+                    </div>
+                    <div class="span2">
+                        <div class="kpi">{{mention_count}}</div>
+                        <div><small>@mentions</small></div>
+                    </div>
+                    <div class="span2">
+                        <div class="kpi">{{alert_count_today}}</div>
+                        <div><small>alerts today</small></div>
+                    </div>
+                    <div class="span2">
+                        <div class="kpi">{{alert_count}}</div>
+                        <div><small>total alerts</small></div>
+                    </div>
+                  </div>
+                </section>
+                <!-- Graph
+                ================================================== -->
+                <section id="forms">
+                  <div class="sub-header">
+                    <h2>Recent Event Types</h2>
+                  </div>
+                  <div class="row-fluid row-fluid-alternate-bg">
+                    <div class="span12">
+                        <div id="mainChart"></div>
+                    </div>
+                  </div>
+                </section>
+
+                <!-- Tables
+                ================================================== -->
+                <section id="tables">
+                  <div class="sub-header">
+                    <h2>Tables</h2>
+                  </div>
+                  <table class="table table-striped full-section table-hover">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Event Count</th>
+                        <th>% All Events</th>
+                        <th>Alerts</th>
+                        <th>#hashtags</th>
+                        <th>@mentions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {{#known_nodes}}
+                        <tr>
+                          <td class="primary"><a href="/node/{{node_name}}">{{node_name}}</a></td>
+                          <td>{{total_messages}}</td>
+                          <td>
+                            <div class="progress progress-mini">
+                              <div class="bar" style="width: {{percent_of_all_events}}%"></div>
+                            </div>
+                          </td>
+                          <td>{{alert_count}}</td>
+                          <td>{{hashtag_count}}</td>
+                          <td>{{mention_count}}</td>
+                        </tr>
+                      {{/known_nodes}}
+                    </tbody>
+                  </table>
+                </section>
+            </div>
+        </div>
+    </div>
+</div><!-- /container -->
+
+
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script src="js/highcharts.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="bootstrap/js/bootstrap-dropdown.js"></script>
+    <script src="bootstrap/js/bootstrap-collapse.js"></script>
+
+    <script type="text/javascript">
+      /*
+       * A highcharts spline graph, customized for a nicer Inspiritas-look.
+       *
+       * All the options can be separated into a reusable object,
+       * in order to create multiple charts with the same looks:
+       * http://www.highcharts.com/documentation/how-to-use
+       *
+       * TODO: Design the tooltips when hovering items.
+       */
+      new Highcharts.Chart({
+          chart: {
+              renderTo: 'mainChart',
+              defaultSeriesType: 'spline',
+              height: 250,
+              plotBorderColor: '#e3e6e8',
+              plotBorderWidth: 1,
+              plotBorderRadius: 0,
+              backgroundColor: '',
+              spacingLeft: 0,
+              plotBackgroundColor: '#FFFFFF',
+              marginTop: 5,
+              marginBottom: 35,
+              zoomType: 'x,y'
+          },
+
+          /*
+           * NOTE: Highcharts is FREE for non-commercial projects only,
+           * and requires the credits ("Highcharts.com" in the corner).
+           *
+           * If you've purchased a license, you can remove the credit by
+           * adding `enabled: false` to `credits`.
+           *
+           */
+          credits: {
+              style: {
+                  color: '#9fa2a5'
+              }
+          },
+
+          title: {
+              text: ''
+          },
+
+          legend: {
+              align: 'left',
+              floating: true,
+              verticalAlign: 'top',
+              borderWidth: 0,
+              y: 3,
+              x: 10,
+              itemStyle: {
+                  fontSize: '11px',
+                  color: '#1E1E1E'
+              }
+          },
+
+          yAxis: {
+              title: {
+                  text: ''
+              },
+              gridLineColor: '#FAFAFA',
+              opposite: true,
+              labels: {
+                  style: {
+                      color: '#9fa2a5'
+                  }
+              }
+          },
+
+          xAxis: {
+              type: 'datetime',
+              lineWidth: 0,
+              maxZoom: 5 * 24 * 3600 * 1000, // 5 days
+              tickInterval: 24 * 3600 * 1000, // 1 day
+              labels: {
+                  formatter: function() {
+                      return Highcharts.dateFormat('%e', this.value);
+                  },
+                  x: 0,
+                  style: {
+                      color: '#9fa2a5'
+                  }
+              }
+          },
+
+          plotOptions: {
+              series: {
+                  marker: {
+                      lineWidth: 1, // The border of each point (defaults to white)
+                      radius: 4 // The thickness of each point
+                  },
+
+                  lineWidth: 3, // The thickness of the line between points
+                  shadow: false
+              }
+          },
+
+          /*
+           * Colors for the main lines.
+           *
+           * We recommend not using more lines than four in a single chart
+           * like this one, but if you must, then make sure you add more colors
+           * below, since otherwise you'll default to Highcharts' ugly colors :)
+           */
+          colors: [
+              '#E35733', // orange
+              '#4c97d7', // blue
+              '#52d74c', // green
+              '#e268de' // purple
+          ],
+
+          series: [ {
+              pointStart: Date.UTC(2012,11,3),
+              pointInterval: 24 * 3600 * 1000, // 1 day
+              name: 'Debug',
+              marker: {
+                  symbol: 'circle'
+              },
+              // Just some random data. Replace this with your own.
+              data: [4, 5, 8, 9, 10, 11, 10, 8, 7, 6, 9, 10, 13, 15, 16, 18, 15, 12, 10, 9, 8, 5, 8, 9, 10, 13, 15, 14]
+          },{
+              pointStart: Date.UTC(2012,11,3),
+              pointInterval: 24 * 3600 * 1000, // 1 day
+              name: 'Info',
+              marker: {
+                  symbol: 'circle'
+              },
+              // Just some random data. Replace this with your own.
+              data: [0, 2, 3, 4, 5, 3, 2, 2, 3, 4, 6, 7, 8, 9, 10, 8, 11, 7, 5, 3, 4, 4, 1, 3, 4, 5, 8, 10]
+          },{
+              pointStart: Date.UTC(2012,11,3),
+              pointInterval: 24 * 3600 * 1000, // 1 day
+              name: 'Notice',
+              marker: {
+                  symbol: 'circle'
+              },
+              // Just some random data. Replace this with your own.
+              data: [0, 2, 3, 4, 5, 3, 2, 2, 3, 4, 6, 7, 8, 9, 10, 8, 11, 7, 5, 3, 4, 4, 1, 3, 4, 5, 8, 10]
+          },{
+              pointStart: Date.UTC(2012,11,3),
+              pointInterval: 24 * 3600 * 1000, // 1 day
+              name: 'Warn',
+              marker: {
+                  symbol: 'circle'
+              },
+              // Just some random data. Replace this with your own.
+              data: [0, 2, 3, 4, 5, 3, 2, 2, 3, 4, 6, 7, 8, 9, 10, 8, 11, 7, 5, 3, 4, 4, 1, 3, 4, 5, 8, 10]
+          },{
+              pointStart: Date.UTC(2012,11,3),
+              pointInterval: 24 * 3600 * 1000, // 1 day
+              name: 'Error',
+              marker: {
+                  symbol: 'circle'
+              },
+              // Just some random data. Replace this with your own.
+              data: [0, 2, 3, 4, 5, 3, 2, 2, 3, 4, 6, 7, 8, 9, 10, 8, 11, 7, 5, 3, 4, 4, 1, 3, 4, 5, 8, 10]
+          },{
+              pointStart: Date.UTC(2012,11,3),
+              pointInterval: 24 * 3600 * 1000, // 1 day
+              name: 'Critical',
+              marker: {
+                  symbol: 'circle'
+              },
+              // Just some random data. Replace this with your own.
+              data: [0, 2, 3, 4, 5, 3, 2, 2, 3, 4, 6, 7, 8, 9, 10, 8, 11, 7, 5, 3, 4, 4, 1, 3, 4, 5, 8, 10]
+          },{
+              pointStart: Date.UTC(2012,11,3),
+              pointInterval: 24 * 3600 * 1000, // 1 day
+              name: 'Alert',
+              marker: {
+                  symbol: 'circle'
+              },
+              // Just some random data. Replace this with your own.
+              data: [0, 2, 3, 4, 5, 3, 2, 2, 3, 4, 6, 7, 8, 9, 10, 8, 11, 7, 5, 3, 4, 4, 1, 3, 4, 5, 8, 10]
+          },{
+              pointStart: Date.UTC(2012,11,3),
+              pointInterval: 24 * 3600 * 1000, // 1 day
+              name: 'Emergency',
+              marker: {
+                  symbol: 'circle'
+              },
+              // Just some random data. Replace this with your own.
+              data: [0, 2, 3, 4, 5, 3, 2, 2, 3, 4, 6, 7, 8, 9, 10, 8, 11, 7, 5, 3, 4, 4, 1, 3, 4, 5, 8, 10]
+          }
+          ]
+      });
+    </script>
+
+  </body>
 </html>
+

@@ -1,6 +1,9 @@
 
 -define(MUSTACHE(Filename),          code:priv_dir(popcorn) ++ "/../templates/" ++ Filename).
 
+-define(TOTAL_EVENT_COUNTER,         binary_to_atom(<<"__popcorn__total_events">>, latin1)).
+-define(PERCENT(Value),              round(Value * 100 * math:pow(10, 2)) / math:pow(10, 2)).
+-define(NOW,                         folsom_utils:now_epoch_micro()).
 -define(POPCORN_DEBUG_MSG(Msg),      io:format("~s\n", [Msg]), lager:debug(Msg)).
 -define(POPCORN_INFO_MSG(Msg),       io:format("~s\n", [Msg]), lager:info(Msg)).
 -define(POPCORN_NOTICE_MSG(Msg),     io:format("~s\n", [Msg]), lager:notice(Msg)).

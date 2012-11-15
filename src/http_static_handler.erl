@@ -34,10 +34,11 @@ terminate(_Req, _State) ->
 
 guess_content_type(Filename) ->
     case filename:extension(Filename) of
-        <<".js">>  -> <<"application/javascript">>;
-        <<".css">> -> <<"text/css">>;
-        <<".png">> -> <<"image/png">>;
-        _          -> <<"application/octet-stream">>
+        <<".js">>   -> <<"application/javascript">>;
+        <<".css">>  -> <<"text/css">>;
+        <<".less">> -> <<"text/less">>;
+        <<".png">>  -> <<"image/png">>;
+        _           -> <<"application/octet-stream">>
     end.
 
 file_contents(Path) -> file:read_file(Path).

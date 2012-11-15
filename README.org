@@ -35,3 +35,8 @@
   screen.  
 
 
+
+Thanks to the following:
+
+https://github.com/littke/inspiritas-bootstrap/
+
