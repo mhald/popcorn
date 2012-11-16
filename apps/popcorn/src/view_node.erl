@@ -11,7 +11,8 @@
 				 critical_event_counts/1,
 				 alert_event_counts/1,
 				 emergency_event_counts/1,
-         username/0]).
+         username/0,
+         current_node_name/1]).
 
 -spec debug_event_counts(dict()) -> list().
 debug_event_counts(Context) -> event_counts(mustache:get(node_name, Context), 7).
@@ -46,3 +47,6 @@ event_counts(Node_Name, Severity) ->
 
 -spec username() -> string().
 username() -> "marc".
+
+-spec current_node_name(dict()) -> string().
+current_node_name(Context) -> binary_to_list(mustache:get(node_name, Context)).

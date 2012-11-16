@@ -33,8 +33,9 @@ init([]) ->
 
 'LOGGING'({log_message, Node, Node_Role, Node_Version, Severity, Message}, State) ->
     %% log the message
-    ets:insert(State#state.history_name, {?NOW, [{severity, Severity},
-                                                {message,  Message}]}),
+    ets:insert(State#state.history_name, #log_message{timestamp = ?NOW,
+                                                      severity  = Severity,
+                                                      message   = Message}),
 
     %% increment the severity counter for this node
     folsom_metrics:notify({proplists:get_value(Severity, State#state.severity_metric_names), {inc, 1}}),
@@ -75,7 +76,7 @@ init([]) ->
         _         -> ets:delete(History_Name)
     end,
 
-    ets:new(History_Name, [named_table, ordered_set, public]),
+    ets:new(History_Name, [named_table, ordered_set, public, {keypos, #log_message.timestamp}]),
 
     %% 0 = emergency -> 7 = debug
     Separator_Binary = <<30>>,
