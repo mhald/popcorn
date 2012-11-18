@@ -6,7 +6,8 @@
 
 -export([log_messages/1,
          username/0,
-         current_node_name/1]).
+         current_node_name/1,
+         streaming_url/1]).
 
 -spec log_messages(dict()) -> list().
 log_messages(Context) ->
@@ -46,3 +47,17 @@ username() -> "marc".
 
 -spec current_node_name(dict()) -> string().
 current_node_name(Context) -> binary_to_list(mustache:get(node_name, Context)).
+
+-spec streaming_url(dict()) -> string().
+streaming_url(Context) ->
+    Node_Name = mustache:get(node_name, Context),
+    Severity  = mustache:get(severity,  Context),
+
+    "http://10.10.10.10:9125/node/" ++ 
+    binary_to_list(Node_Name) ++ 
+    "/log/" ++
+    case Severity of
+        <<"any">> -> "";
+        _         -> binary_to_list(Severity) ++ "/"
+    end ++
+    "stream".

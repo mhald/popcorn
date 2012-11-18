@@ -23,6 +23,7 @@ init([]) ->
     io:format("Creating ets tables..."),
     ets:new(current_connected_users, [named_table, set, public]),
     ets:new(current_nodes, [named_table, set, public]),
+    ets:new(current_node_streams, [named_table, bag, public]),
     io:format(" done!\n"),
 
     io:format("Creating global metrics..."),

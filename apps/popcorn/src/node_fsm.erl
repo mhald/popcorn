@@ -33,9 +33,11 @@ init([]) ->
 
 'LOGGING'({log_message, Node, Node_Role, Node_Version, Severity, Message}, State) ->
     %% log the message
-    ets:insert(State#state.history_name, #log_message{timestamp = ?NOW,
-                                                      severity  = Severity,
-                                                      message   = Message}),
+    Log_Message = #log_message{timestamp = ?NOW,
+                               severity  = Severity,
+                               message   = Message},
+
+    ets:insert(State#state.history_name, Log_Message),
 
     %% increment the severity counter for this node
     folsom_metrics:notify({proplists:get_value(Severity, State#state.severity_metric_names), {inc, 1}}),
@@ -64,6 +66,12 @@ init([]) ->
 
     folsom_metrics:notify({Node_Severity_History_Counter, {inc, 1}}),
     folsom_metrics:notify({Total_Severity_History_Counter, {inc, 1}}),
+
+    %% Notify any streams connected
+    Stream_Pids = ets:select(current_node_streams, [{{'$1', '$2'}, [{'=:=', '$1', Node}], ['$2']}]),
+    lists:foreach(fun(Stream_Pid) ->
+        Stream_Pid ! {new_message, Log_Message}
+      end, Stream_Pids),
 
     {next_state, 'LOGGING', State}.
 

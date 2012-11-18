@@ -20,6 +20,18 @@ handle(Req, State) ->
 
 terminate(_Req, _State) -> ok.
 
+handle_path(<<"GET">>, [<<"node">>, Node_Name, <<"log">>, <<"stream">>], Req, State) ->
+    handle_path(<<"GET">>, [<<"node">>, Node_Name, <<"log">>, <<"all">>, <<"stream">>], Req, State);
+handle_path(<<"GET">>, [<<"node">>, Node_Name, <<"log">>, Severity, <<"stream">>], Req, State) ->
+    ?POPCORN_DEBUG_MSG("SSE Request to stream logs for ~p, Severity: ~p", [Node_Name, Severity]),
+
+    %% store this pid in the ets table so the node can notify when events come in
+    ets:insert(current_node_streams, {Node_Name, self()}),
+
+    Headers     = [{"Content-Type", <<"text/event-stream">>}],
+    {ok, Reply}  = cowboy_req:chunked_reply(200, Headers, Req),
+    handle_loop(Reply, State);
+
 handle_path(<<"GET">>, [<<"node">>, Node_Name, <<"log">>], Req, State) ->
     handle_path(<<"GET">>, [<<"node">>, Node_Name, <<"log">>, <<"all">>], Req, State);
 handle_path(<<"GET">>, [<<"node">>, Node_Name, <<"log">>, Severity], Req, State) ->
@@ -37,4 +49,26 @@ handle_path(<<"GET">>, [<<"node">>, Node_Name, <<"log">>, Severity], Req, State)
                      Output      = mustache:render(view_node_log, TFun, Context),
                      {ok, Reply} = cowboy_req:reply(200, [], Output, Req),
                      {ok, Reply, State}
+    end.
+
+handle_loop(Req, State) ->
+    receive
+        logout -> 
+            {ok, Req, State};
+        {cowboy_req, resp_sent} ->
+            handle_loop(Req, State);
+        {new_message, Log_Message} ->
+            Json_Event = {struct, [{"message", Log_Message#log_message.message},
+                                   {"timestamp", Log_Message#log_message.timestamp},
+                                   {"severity", popcorn_util:number_to_severity(Log_Message#log_message.severity)}]},
+            Event      = lists:flatten(mochijson:encode(Json_Event)),
+            case cowboy_req:chunk(lists:flatten(["data: ", Event, "\n\n"]), Req) of
+                ok -> handle_loop(Req, State);
+                {error, closed} -> {ok, Req, State}
+            end;
+        Other ->
+            ?POPCORN_DEBUG_MSG("streaming log handler received unknown message: ~p", [Other]),
+            Event = ["data: ", "test", "\n\n"],
+            ok = cowboy_req:chunk(Event, Req),
+            handle_loop(Req, State)
     end.

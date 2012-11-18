@@ -6,6 +6,7 @@
         <link rel='stylesheet/less' href="/css/popcorn.less" type="text/css">
         <script src="/js/less.js" type="text/javascript"></script>
         <link href="/css/jquery-ui.css" rel="stylesheet" type="text/css">
+        <script src="/js/node_log.js" type="text/javascript"></script>
     </head>
     <body>
 
@@ -73,7 +74,7 @@
                   <div class="sub-header">
                     <h2>Raw Logs</h2>
                   </div>
-                  <table class="table table-striped full-section table-hover">
+                  <table id="log-messages" class="table table-striped full-section table-hover">
                     <thead>
                       <tr>
                         <th>Time</th>
@@ -106,6 +107,13 @@
     <script src="/bootstrap/js/bootstrap-dropdown.js"></script>
     <script src="/bootstrap/js/bootstrap-collapse.js"></script>
 
+    <script type="text/javascript">
+      var source = new EventSource("{{streaming_url}}")
+
+      source.onmessage = function(log_message) {
+        showNewLogMessage(JSON.parse(log_message.data));
+      }
+    </script>
   </body>
 </html>
 
