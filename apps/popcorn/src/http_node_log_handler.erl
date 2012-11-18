@@ -58,8 +58,16 @@ handle_loop(Req, State) ->
         {cowboy_req, resp_sent} ->
             handle_loop(Req, State);
         {new_message, Log_Message} ->
+            UTC_Timestamp = calendar:now_to_universal_time({Log_Message#log_message.timestamp div 1000000000000, 
+                                                            Log_Message#log_message.timestamp div 1000000 rem 1000000,
+                                                            Log_Message#log_message.timestamp rem 1000000}),
+            {{Year, Month, Day}, {Hour, Minute, Second}} = UTC_Timestamp,
+            Formatted_DateTime = lists:flatten(io_lib:format("~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0B", [Year, Month, Day, Hour, Minute, Second])),
+            Formatted_Time     = lists:flatten(io_lib:format("~2.10.0B:~2.10.0B:~2.10.0B", [Hour, Minute, Second])),
+
             Json_Event = {struct, [{"message", Log_Message#log_message.message},
-                                   {"timestamp", Log_Message#log_message.timestamp},
+                                   {"time", Formatted_Time},
+                                   {"datetime", Formatted_DateTime},
                                    {"severity", popcorn_util:number_to_severity(Log_Message#log_message.severity)}]},
             Event      = lists:flatten(mochijson:encode(Json_Event)),
             case cowboy_req:chunk(lists:flatten(["data: ", Event, "\n\n"]), Req) of
