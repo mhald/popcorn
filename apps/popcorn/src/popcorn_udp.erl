@@ -45,20 +45,20 @@ handle_cast(_Msg, State) ->
 
 
 handle_info({udp, Socket, _Host, _Port, Bin}, State) ->
-    {Node, Node_Role, Node_Version, Severity, Message} = decode_protobuffs_message(Bin),
+    {Popcorn_Node, Log_Message} = decode_protobuffs_message(Bin),
 
     %% create the node fsm, if necessary
-    case ets:select_count(current_nodes, [{{'$1', '$2'}, [{'=:=', '$1', Node}], [true]}]) of
+    case ets:select_count(current_nodes, [{{'$1', '$2'}, [{'=:=', '$1', Popcorn_Node#popcorn_node.node_name}], [true]}]) of
         0 -> {ok, Pid} = supervisor:start_child(node_sup, []),
-             ok = gen_fsm:sync_send_event(Pid, {set_node_name, Node, Node_Role}),
-             ets:insert(current_nodes, {Node, Pid});
+             ok = gen_fsm:sync_send_event(Pid, {set_popcorn_node, Popcorn_Node}),
+             ets:insert(current_nodes, {Popcorn_Node#popcorn_node.node_name, Pid});
         _ -> ok
     end,
 
     %% let the fsm create the log
-    case ets:lookup(current_nodes, Node) of
-        []                 -> ?POPCORN_WARN_MSG("unable to find fsm for node ~p", [Node]);
-        [{_, Running_Pid}] -> gen_fsm:send_event(Running_Pid, {log_message, Node, Node_Role, Node_Version, Severity, Message})
+    case ets:lookup(current_nodes, Popcorn_Node#popcorn_node.node_name) of
+        []                 -> ?POPCORN_WARN_MSG("unable to find fsm for node ~p", [Popcorn_Node#popcorn_node.node_name]);
+        [{_, Running_Pid}] -> gen_fsm:send_event(Running_Pid, {log_message, Popcorn_Node, Log_Message})
     end,
 
     %%Tags = get_tags(binary_to_list(Message)),
@@ -88,6 +88,7 @@ get_tags(Message) ->
       end, Tags_List),
     string:join(Cleaned_Tags, ",").
 
+-spec decode_protobuffs_message(binary()) -> {#popcorn_node{}, #log_message{}}.
 decode_protobuffs_message(Encoded_Message) ->
     {{1, Node},     Rest1}     = protobuffs:decode(Encoded_Message, bytes),
     {{2, Node_Role}, Rest2}    = protobuffs:decode(Rest1,           bytes),
@@ -98,4 +99,17 @@ decode_protobuffs_message(Encoded_Message) ->
     {{7, Function},  Rest7}    = protobuffs:decode(Rest6,           bytes),
     {{8, Line},  Rest8}        = protobuffs:decode(Rest7,           bytes),
     {{9, Pid},  <<>>}          = protobuffs:decode(Rest8,           bytes),
-    {Node, Node_Role, Node_Version, Severity, Message}.
+
+    Popcorn_Node = #popcorn_node{node_name = Node,
+                                 role      = Node_Role,
+                                 version   = Node_Version},
+
+    Log_Message  = #log_message{timestamp    = ?NOW,     %% this should be part of the protobuffs packet?
+                                severity     = Severity,
+                                message      = Message,
+                                log_module   = Module,
+                                log_function = Function,
+                                log_line     = Line,
+                                log_pid      = Pid},
+
+    {Popcorn_Node, Log_Message}.

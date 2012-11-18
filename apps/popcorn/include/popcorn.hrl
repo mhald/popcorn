@@ -22,6 +22,15 @@
 -define(POPCORN_ALERT_MSG(Msg, Args),      io:format("~s\n", [lists:flatten(io_lib:format(Msg, Args))]), lager:alert(Msg, Args)).
 -define(POPCORN_EMERGENCY_MSG(Msg, Args),  io:format("~s\n", [lists:flatten(io_lib:format(Msg, Args))]), lager:emergency(Msg, Args)).
 
--record(log_message, {timestamp :: number(),
-                      severity  :: integer(),
-                      message   :: binary()}).
+-record(popcorn_node, {node_name :: binary(),
+                       role      :: binary(),
+                       version   :: binary()}).
+
+-record(log_message, {timestamp    :: number(),
+                      severity     :: integer(),
+                      message      :: binary(),
+                      log_module   :: binary(),      %% underscore in the name is to prevent confusion with BIF and types
+                      log_function :: binary(),
+                      log_line     :: integer(),
+                      log_pid      :: binary()}).
+

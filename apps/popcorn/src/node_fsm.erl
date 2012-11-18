@@ -20,8 +20,7 @@
 -record(state, {history_name          :: atom(),
                 severity_metric_names :: list(),
                 most_recent_version   :: string(),
-                node_name             :: binary(),
-                role                  :: string()}).
+                popcorn_node          :: #popcorn_node{}}).
 
 start_link() -> gen_fsm:start_link(?MODULE, [], []).
 
@@ -31,16 +30,12 @@ init([]) ->
     {ok, 'LOGGING', #state{}}.
 
 
-'LOGGING'({log_message, Node, Node_Role, Node_Version, Severity, Message}, State) ->
+'LOGGING'({log_message, Popcorn_Node, Log_Message}, State) ->
     %% log the message
-    Log_Message = #log_message{timestamp = ?NOW,
-                               severity  = Severity,
-                               message   = Message},
-
     ets:insert(State#state.history_name, Log_Message),
 
     %% increment the severity counter for this node
-    folsom_metrics:notify({proplists:get_value(Severity, State#state.severity_metric_names), {inc, 1}}),
+    folsom_metrics:notify({proplists:get_value(Log_Message#log_message.severity, State#state.severity_metric_names), {inc, 1}}),
 
     %% increment the total event counter
     folsom_metrics:notify({?TOTAL_EVENT_COUNTER, {inc, 1}}),
@@ -48,10 +43,11 @@ init([]) ->
     %% ensure the metric exists for this hour, severity combination and increment
     Prefix    = <<"_popcorn__">>,
     Hour      = list_to_binary(popcorn_util:hour()),
-    SeverityB = list_to_binary(integer_to_list(Severity)),
+    SeverityB = list_to_binary(integer_to_list(Log_Message#log_message.severity)),
     Sep       = <<"_">>,
+    Node_Name = Popcorn_Node#popcorn_node.node_name,
 
-    Node_Severity_History_Counter = binary_to_atom(<<Prefix/binary, Sep/binary, Node/binary, Sep/binary, SeverityB/binary, Sep/binary, Hour/binary>>, latin1),
+    Node_Severity_History_Counter = binary_to_atom(<<Prefix/binary, Sep/binary, Node_Name/binary, Sep/binary, SeverityB/binary, Sep/binary, Hour/binary>>, latin1),
     Total_Severity_History_Counter = binary_to_atom(<<Prefix/binary, Sep/binary, SeverityB/binary, Sep/binary, Hour/binary>>, latin1),
 
     case folsom_metrics:metric_exists(Node_Severity_History_Counter) of
@@ -68,14 +64,15 @@ init([]) ->
     folsom_metrics:notify({Total_Severity_History_Counter, {inc, 1}}),
 
     %% Notify any streams connected
-    Stream_Pids = ets:select(current_node_streams, [{{'$1', '$2'}, [{'=:=', '$1', Node}], ['$2']}]),
+    Stream_Pids = ets:select(current_node_streams, [{{'$1', '$2'}, [{'=:=', '$1', Node_Name}], ['$2']}]),
     lists:foreach(fun(Stream_Pid) ->
         Stream_Pid ! {new_message, Log_Message}
       end, Stream_Pids),
 
     {next_state, 'LOGGING', State}.
 
-'LOGGING'({set_node_name, Node_Name, Role}, _From, State) ->
+'LOGGING'({set_popcorn_node, Popcorn_Node}, _From, State) ->
+    Node_Name        = Popcorn_Node#popcorn_node.node_name,
     Prefix           = <<"_popcorn__">>,
     History_Name     = binary_to_atom(<<Prefix/binary, Node_Name/binary>>, latin1),
 
@@ -98,9 +95,8 @@ init([]) ->
     lists:foreach(fun({_, N}) -> folsom_metrics:new_counter(N) end, Severity_Metric_Names),
 
     {reply, ok, 'LOGGING', State#state{history_name          = History_Name,
-                                       node_name             = Node_Name,
                                        severity_metric_names = Severity_Metric_Names,
-                                       role                  = Role}};
+                                       popcorn_node          = Popcorn_Node}};
 
 'LOGGING'(get_message_counts, _From, State) ->
     Severity_Counts = lists:map(fun({Severity, Metric_Name}) ->
@@ -115,7 +111,7 @@ init([]) ->
     Prefix    = <<"_popcorn__">>,
     SeverityB = list_to_binary(integer_to_list(Severity)),
     Sep       = <<"_">>,
-    Node_Name = State#state.node_name,
+    Node_Name = (State#state.popcorn_node)#popcorn_node.node_name,
 
 		Hours_Ago     = lists:seq(0, 23),
     Metric_Names  = lists:map(fun(Hour) -> HourB = list_to_binary(Hour), binary_to_atom(<<Prefix/binary, Sep/binary, Node_Name/binary, Sep/binary, SeverityB/binary, Sep/binary, HourB/binary>>, latin1) end, popcorn_util:last_24_hours()),
