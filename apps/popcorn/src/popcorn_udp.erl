@@ -93,7 +93,9 @@ decode_protobuffs_message(Encoded_Message) ->
     {{2, Node_Role}, Rest2}    = protobuffs:decode(Rest1,           bytes),
     {{3, Node_Version}, Rest3} = protobuffs:decode(Rest2,           bytes),
     {{4, Severity}, Rest4}     = protobuffs:decode(Rest3,           bytes),
-    {{5, Message},  <<>>}      = protobuffs:decode(Rest4,           bytes),
-
+    {{5, Message},  Rest5}     = protobuffs:decode(Rest4,           bytes),
+    {{6, Module},  Rest6}      = protobuffs:decode(Rest5,           bytes),
+    {{7, Function},  Rest7}    = protobuffs:decode(Rest6,           bytes),
+    {{8, Line},  Rest8}        = protobuffs:decode(Rest7,           bytes),
+    {{9, Pid},  <<>>}          = protobuffs:decode(Rest8,           bytes),
     {Node, Node_Role, Node_Version, Severity, Message}.
-
