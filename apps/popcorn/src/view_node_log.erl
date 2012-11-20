@@ -52,8 +52,11 @@ current_node_name(Context) -> binary_to_list(mustache:get(node_name, Context)).
 streaming_url(Context) ->
     Node_Name = mustache:get(node_name, Context),
     Severity  = mustache:get(severity,  Context),
+    {ok, Http_Listen_Host} = get_opt_env(popcorn, http_listen_host, "localhost"),
+    {ok, Http_Listen_Port} = get_opt_env(popcorn, http_listen_port, 9125),
 
-    "http://10.10.10.10:9125/node/" ++ 
+    "http://" ++ Http_Listen_Host ++ ":" ++ integer_to_list(Http_Listen_Port) ++
+    "/node/" ++ 
     binary_to_list(Node_Name) ++ 
     "/log/" ++
     case Severity of
@@ -61,3 +64,9 @@ streaming_url(Context) ->
         _         -> binary_to_list(Severity) ++ "/"
     end ++
     "stream".
+
+get_opt_env(Mod, Var, Default) ->
+    case application:get_env(Mod, Var) of
+        {ok, Val} -> {ok, Val};
+        _         -> {ok, Default}
+    end.
