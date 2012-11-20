@@ -1,9 +1,8 @@
-
 ## Name of the node
 -name popcorn@##HOSTNAME##
 
 ## Cookie for distributed erlang
--setcookie JDF2WPLW17UUWP1QMRV1
+-setcookie popcorn
 
 ## Heartbeat management; auto-restarts VM if it dies or becomes unresponsive
 ## (Disabled by default..use with caution!)
