@@ -1,4 +1,4 @@
-%% rel generated at {2012,11,15} {6,39,46}
+%% rel generated at {2012,11,20} {19,50,12}
 {release,{"popcorn","v##VERSION##"},
          {erts,"5.9.2"},
          [{kernel,"2.15.2"},

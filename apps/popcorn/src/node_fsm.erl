@@ -3,6 +3,7 @@
 -behavior(gen_fsm).
 
 -include("include/popcorn.hrl").
+-include_lib("stdlib/include/ms_transform.hrl").
 
 -export([start_link/0]).
 
@@ -17,6 +18,9 @@
     'LOGGING'/2,
     'LOGGING'/3]).
 
+-define(MAX_RETENTION_MICRO, 60 * 60 * 12 * 1000).  %% 12 hours
+-define(EXPIRE_TIMER,        15000).
+
 -record(state, {history_name          :: atom(),
                 severity_metric_names :: list(),
                 most_recent_version   :: string(),
@@ -27,8 +31,20 @@ start_link() -> gen_fsm:start_link(?MODULE, [], []).
 init([]) ->
     process_flag(trap_exit, true),
 
+    gen_fsm:start_timer(?EXPIRE_TIMER, expire_log_messages),
+
     {ok, 'LOGGING', #state{}}.
 
+%% TODO  i don't think this is accurately measuring and deleting after MAX_RETENTION_MICRO ...  but pretty sure my math is just wrong
+'LOGGING'({timeout, _From, expire_log_messages}, State) ->
+    Oldest_Timestamp = ?NOW - ?MAX_RETENTION_MICRO,
+    Purged_Records = ets:select_delete(State#state.history_name, ets:fun2ms(fun(#log_message{timestamp = TS}) when TS < Oldest_Timestamp -> true end)),
+
+    ?POPCORN_DEBUG_MSG("purged ~p records from ~p", [Purged_Records, State#state.popcorn_node]),
+
+    gen_fsm:start_timer(?EXPIRE_TIMER, expire_log_messages),
+
+    {next_state, 'LOGGING', State};
 
 'LOGGING'({log_message, Popcorn_Node, Log_Message}, State) ->
     %% log the message

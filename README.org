@@ -29,6 +29,9 @@
         ]} 
 #+END EXAMPLE
 
+* Requirements
+  - Erlang R15B01 or later is required (for Cowboy dependency)
+
 * Accessing
   By default, the server will listen on port 9125 (both UDP and HTTP), 
   so after running, visit http://{host}:9125 and you should see a login 
