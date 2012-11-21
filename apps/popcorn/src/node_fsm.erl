@@ -35,12 +35,9 @@ init([]) ->
 
     {ok, 'LOGGING', #state{}}.
 
-%% TODO  i don't think this is accurately measuring and deleting after MAX_RETENTION_MICRO ...  but pretty sure my math is just wrong
 'LOGGING'({timeout, _From, expire_log_messages}, State) ->
     Oldest_Timestamp = ?NOW - ?MAX_RETENTION_MICRO,
     Purged_Records = ets:select_delete(State#state.history_name, ets:fun2ms(fun(#log_message{timestamp = TS}) when TS < Oldest_Timestamp -> true end)),
-
-    ?POPCORN_DEBUG_MSG("purged ~p records from ~p", [Purged_Records, State#state.popcorn_node]),
 
     gen_fsm:start_timer(?EXPIRE_TIMER, expire_log_messages),
 
