@@ -18,7 +18,7 @@
     'LOGGING'/2,
     'LOGGING'/3]).
 
--define(MAX_RETENTION_MICRO, 60 * 60 * 12 * 1000).  %% 12 hours
+-define(MAX_RETENTION_MICRO, 12 * 60 * 60 * 1000000).  %% 12 hours
 -define(EXPIRE_TIMER,        15000).
 
 -record(state, {history_name          :: atom(),
@@ -37,7 +37,9 @@ init([]) ->
 
 'LOGGING'({timeout, _From, expire_log_messages}, State) ->
     Oldest_Timestamp = ?NOW - ?MAX_RETENTION_MICRO,
-    Purged_Records = ets:select_delete(State#state.history_name, ets:fun2ms(fun(#log_message{timestamp = TS}) when TS < Oldest_Timestamp -> true end)),
+
+    %% TODO, removed this because it's causing too many records to be deleted...  this should be configurable also...
+    %Purged_Records = ets:select_delete(State#state.history_name, ets:fun2ms(fun(#log_message{timestamp = TS}) when TS < Oldest_Timestamp -> true end)),
 
     gen_fsm:start_timer(?EXPIRE_TIMER, expire_log_messages),
 
