@@ -6,7 +6,11 @@
         <link rel='stylesheet/less' href="/css/popcorn.less" type="text/css">
         <script src="/js/less.js" type="text/javascript"></script>
         <link href="/css/jquery-ui.css" rel="stylesheet" type="text/css">
-        <script src="/js/node_log.js" type="text/javascript"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script src="/bootstrap/js/bootstrap-dropdown.js"></script>
+        <script src="/bootstrap/js/bootstrap-collapse.js"></script>
+        <script src="/bootstrap/js/bootstrap-tooltip.js"></script>
+        <script src="/bootstrap/js/bootstrap-popover.js"></script>
     </head>
     <body>
 
@@ -26,7 +30,7 @@
 
           <div class="nav-collapse collapse" id="main-menu">
             <div class="auth pull-right">
-                <img class="avatar" src="images/littke.png">
+                <img class="avatar" src="/images/littke.png">
                 <span class="name">{{username}}</span><br/>
                 <span class="links">
                     <a href="/settings">Settings</a>
@@ -39,25 +43,40 @@
     </div>
 
     <div class="container">
-        <div class="row-fluid">
+      <div class="row-fluid">
             <div class="span3">
                 <aside>
                     <nav>
                         <ul class="nav">
                           <li class="selected">
-                            <a href="/"><i class="icon-play"></i> Dashboard</a>
+                            <a href="#" class="nav-filter"><i class="icon-filter"></i> Filters</a>
+                          </li>
+
+                          <li class="selected">
+                            <a href="#" class="nav-filter">Role</a>
                           </li>
                           <li>
-                            <a href="/search"><i class="icon-th-list icon-white"></i> Search</a>
+                            {{#known_roles}}
+                            <a href="#" class="nav-filter"><label class="checkbox"><input type="checkbox" class="filter-role" data-val="{{role}}"{{filter_state}}>{{role}}</label></a>
+                            {{/known_roles}}
+                          </li>
+
+                          <li class="selected">
+                            <a href="#" class="nav-filter">Node</a>
                           </li>
                           <li>
-                            <a href="/alerts"><i class="icon-font icon-white"></i> Alerts</a>
+                            {{#known_nodes}}
+                            <a href="#" class="nav-filter"><label class="checkbox"><input type="checkbox" class="filter-node" data-val="{{name}}"{{filter_state}}>{{name}}</label></a>
+                            {{/known_nodes}}
+                          </li>
+
+                          <li class="selected">
+                            <a href="#" class="nav-filter">Severity</a>
                           </li>
                           <li>
-                            <a href="/roles"><i class="icon-user icon-white"></i> Roles</a>
-                          </li>
-                          <li>
-                            <a href="/nodes"><i class="icon-retweet icon-white"></i> Nodes</a>
+                            {{#known_severities}}
+                            <a href="#" class="nav-filter"><label class="checkbox"><input type="checkbox" class="filter-severity" data-val="{{label}}"{{filter_state}}>{{label}}</label></a>
+                            {{/known_severities}}
                           </li>
                         </ul>
                     </nav>
@@ -67,8 +86,12 @@
                 <div id="content">
 
                   <header>
-                    <h1>{{current_node_name}}</h1>
-                    </header>
+                    <h1>{{current_node_name}}
+                      <div style="float:right;padding-right:36px;">
+                        <a class="btn btn-mini" href="#"><i class="icon-pause" data-toggle="button" id="log-pause"></i></a>
+                      </div>
+                    </h1>
+                  </header>
 
                 <section id="logs">
                   <div class="sub-header">
@@ -77,6 +100,7 @@
                   <table id="log-messages" class="table table-striped full-section table-hover">
                     <thead>
                       <tr>
+                        <th></th>
                         <th>Time</th>
                         <th>Severity</th>
                         <th>Message</th>
@@ -85,8 +109,16 @@
                     <tbody>
                       {{#log_messages}}
                         <tr>
+                          <td style="padding-right:12px;">
+                            <a href="#"
+                               rel="popover"
+                               data-placement="bottom" 
+                               data-content="{{find_more_html}}" 
+                               data-original-title="Find Similar<div style='float:right;'><button class='close close-popover'>&times;</button></div>" 
+                               class="btn btn-mini show-more">...</a>
+                          </td>
                           <td>{{time}}</td>
-                          <td>{{message_severity}}</td>
+                          <td class="sev {{message_severity}}">{{message_severity}}</td>
                           <td>{{message}}</td>
                         </tr>
                       {{/log_messages}}
@@ -99,13 +131,7 @@
 </div><!-- /container -->
 
 
-
-    <!-- Le javascript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-    <script src="/bootstrap/js/bootstrap-dropdown.js"></script>
-    <script src="/bootstrap/js/bootstrap-collapse.js"></script>
+    <script src="/js/node_log.js" type="text/javascript"></script>
 
     <script type="text/javascript">
       var source = new EventSource("{{streaming_url}}")

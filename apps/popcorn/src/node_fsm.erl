@@ -96,7 +96,11 @@ init([]) ->
         _         -> ets:delete(History_Name)
     end,
 
+    %% create the ets table to stpre the raw logs for this node
     ets:new(History_Name, [named_table, ordered_set, public, {keypos, #log_message.timestamp}]),
+
+    %% add this node to the "roles" tets table
+    ets:insert(current_roles, {Popcorn_Node#popcorn_node.role, self()}),
 
     %% 0 = emergency -> 7 = debug
     Separator_Binary = <<30>>,

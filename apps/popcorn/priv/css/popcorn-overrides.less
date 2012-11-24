@@ -632,3 +632,44 @@ body > .container {
         border-bottom: 1px solid #98350a;
     }
 }
+
+.sev {
+  &.debug {
+    color: #777A7C;
+  }
+
+  &.info {
+    color: rgb(74,134,202);
+  }
+
+  &.notice {
+    color: rgb(195,99,214);
+  }
+
+  &.warn {
+    color: rgb(195,116,58);
+  }
+
+  &.error {
+    color: rgb(198,77,53);
+  }
+
+  &.critical {
+    color: rgb(198,77,53);
+  }
+
+  &.alert {
+    color: rgb(198,77,53);
+    font-weight: bold;
+  }
+
+  &.emergency {
+    color: rgb(199,77,53);
+    font-weight: bold;
+    text-decoration: underline;
+  }
+}
+
+.popover-label {
+  font-size: 11px;
+}

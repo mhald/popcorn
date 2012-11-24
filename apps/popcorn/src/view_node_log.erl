@@ -5,9 +5,53 @@
 -include("include/popcorn.hrl").
 
 -export([log_messages/1,
+         known_roles/1,
+         known_nodes/1,
+         known_severities/1,
          username/0,
          current_node_name/1,
          streaming_url/1]).
+
+-spec known_roles(dict()) -> list().
+known_roles(Context) ->
+    Role_Names        = lists:map(fun({Name, _}) -> Name end, ets:tab2list(current_roles)),
+    Unique_Role_Names = sets:to_list(sets:from_list(Role_Names)),
+    lists:map(fun(Role_Name) ->
+        Params = [{'role',         binary_to_list(Role_Name)},
+                  {'filter_state', ""}],
+        dict:from_list(Params)
+      end, Unique_Role_Names).
+
+-spec known_nodes(dict()) -> list().
+known_nodes(Context) ->
+    Default_Filters = dict:to_list(proplists:get_value(default_filters, dict:to_list(Context))),
+    Filtered_On_Nodes = proplists:get_value('node_names', Default_Filters, []),
+
+    Node_Names = lists:map(fun({Name, _}) -> Name end, ets:tab2list(current_nodes)),
+    lists:map(fun(Node_Name) ->
+        Filter_State = case lists:member(Node_Name, Filtered_On_Nodes) of
+                           false -> "";
+                           true  -> " checked"
+                       end,
+        Params = [{'name',         binary_to_list(Node_Name)},
+                  {'filter_state', Filter_State}],
+        dict:from_list(Params)
+      end, Node_Names).
+
+-spec known_severities(dict()) -> list().
+known_severities(Context) ->
+    Default_Filters = dict:to_list(proplists:get_value(default_filters, dict:to_list(Context))),
+    Filtered_On_Severities = proplists:get_value('severities', Default_Filters, []),
+
+    lists:map(fun(Severity_Number) ->
+        Filter_State = case lists:member(Severity_Number, Filtered_On_Severities) of
+                           false -> "";
+                           true  -> " checked"
+                       end,
+        Params = [{'label',        binary_to_list(popcorn_util:number_to_severity(Severity_Number))},
+                  {'filter_state', Filter_State}],
+        dict:from_list(Params)
+      end, lists:reverse(popcorn_util:all_severity_numbers())).
 
 -spec log_messages(dict()) -> list().
 log_messages(Context) ->
@@ -28,17 +72,8 @@ log_messages(Context) ->
                      end,
 
                      lists:map(fun(Log_Message) ->
-                         UTC_Timestamp = calendar:now_to_universal_time({Log_Message#log_message.timestamp div 1000000000000, 
-                                                                         Log_Message#log_message.timestamp div 1000000 rem 1000000,
-                                                                         Log_Message#log_message.timestamp rem 1000000}),
-                         {{Year, Month, Day}, {Hour, Minute, Second}} = UTC_Timestamp,
-                         Formatted_DateTime = lists:flatten(io_lib:format("~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0B", [Year, Month, Day, Hour, Minute, Second])),
-                         Formatted_Time     = lists:flatten(io_lib:format("~2.10.0B:~2.10.0B:~2.10.0B", [Hour, Minute, Second])),
-
-                         dict:from_list([{'time',             Formatted_Time},
-                                         {'datetime',         Formatted_DateTime},
-                                         {'message_severity', binary_to_list(popcorn_util:number_to_severity(Log_Message#log_message.severity))},
-                                         {'message',          binary_to_list(Log_Message#log_message.message)}])
+                         Params = popcorn_util:format_log_message(Log_Message),
+                         dict:from_list(Params)
                        end, Log_Messages)
     end.
 
@@ -70,3 +105,4 @@ get_opt_env(Mod, Var, Default) ->
         {ok, Val} -> {ok, Val};
         _         -> {ok, Default}
     end.
+

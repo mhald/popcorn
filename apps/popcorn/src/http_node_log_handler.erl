@@ -42,8 +42,18 @@ handle_path(<<"GET">>, [<<"node">>, Node_Name, <<"log">>, Severity], Req, State)
 
     case ets:info(Table_Name) of
         undefined -> session_handler:return_404(Req, State);
-        _         -> Context = dict:from_list([{node_name, Node_Name},
-                                               {severity,  Severity}]),
+        _         -> %% the default filters for this view are node and severity only
+                     Severities = case Severity of 
+                                      <<"all">> -> popcorn_util:all_severity_numbers();
+                                      _         -> [popcorn_util:severity_to_number(Severity)]
+                                  end,
+
+                     Default_Filters = [{'node_names', [Node_Name]},
+                                        {'severities', Severities}],
+
+                     Context = dict:from_list([{node_name,       Node_Name},
+                                               {severity,        Severity},
+                                               {default_filters, dict:from_list(Default_Filters)}]),
 
                      TFun        = mustache:compile(view_node_log),
                      Output      = mustache:render(view_node_log, TFun, Context),
@@ -58,17 +68,8 @@ handle_loop(Req, State) ->
         {cowboy_req, resp_sent} ->
             handle_loop(Req, State);
         {new_message, Log_Message} ->
-            UTC_Timestamp = calendar:now_to_universal_time({Log_Message#log_message.timestamp div 1000000000000, 
-                                                            Log_Message#log_message.timestamp div 1000000 rem 1000000,
-                                                            Log_Message#log_message.timestamp rem 1000000}),
-            {{Year, Month, Day}, {Hour, Minute, Second}} = UTC_Timestamp,
-            Formatted_DateTime = lists:flatten(io_lib:format("~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0B", [Year, Month, Day, Hour, Minute, Second])),
-            Formatted_Time     = lists:flatten(io_lib:format("~2.10.0B:~2.10.0B:~2.10.0B", [Hour, Minute, Second])),
-
-            Json_Event = {struct, [{"message", Log_Message#log_message.message},
-                                   {"time", Formatted_Time},
-                                   {"datetime", Formatted_DateTime},
-                                   {"severity", popcorn_util:number_to_severity(Log_Message#log_message.severity)}]},
+            Params = popcorn_util:format_log_message(Log_Message),
+            Json_Event = {struct, Params},
             Event      = lists:flatten(mochijson:encode(Json_Event)),
             case cowboy_req:chunk(lists:flatten(["data: ", Event, "\n\n"]), Req) of
                 ok -> handle_loop(Req, State);
