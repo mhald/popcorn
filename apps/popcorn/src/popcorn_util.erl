@@ -8,6 +8,7 @@
          severity_to_number/1,
          number_to_severity/1,
          all_severity_numbers/0,
+         random_id/0,
          format_log_message/1,
          opt/2]).
 
@@ -40,6 +41,15 @@ number_to_severity(0) -> <<"emergency">>;
 number_to_severity(_) -> <<"?">>.
 
 all_severity_numbers() -> lists:seq(0, 7).
+
+random_id() ->
+    Length = 64,
+    AllowedChars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    random:seed(now()),
+    New_Key = lists:foldl(fun(_, Acc) ->
+                  [lists:nth(random:uniform(length(AllowedChars)), AllowedChars)] ++ Acc
+                end, [], lists:seq(1, Length)),
+    list_to_binary(New_Key).
 
 opt(<<>>, Default)      -> Default;
 opt(undefined, Default) -> Default;

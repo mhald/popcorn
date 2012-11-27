@@ -79,10 +79,10 @@ init([]) ->
     folsom_metrics:notify({Total_Severity_History_Counter, {inc, 1}}),
 
     %% Notify any streams connected
-    Stream_Pids = ets:select(current_node_streams, [{{'$1', '$2'}, [{'=:=', '$1', Node_Name}], ['$2']}]),
-    lists:foreach(fun(Stream_Pid) ->
-        Stream_Pid ! {new_message, Log_Message}
-      end, Stream_Pids),
+    Log_Streams = ets:tab2list(current_log_streams),
+    lists:foreach(fun(Log_Stream) ->
+        gen_fsm:send_all_state_event(Log_Stream#log_stream.stream_pid, {new_message, Log_Message})
+      end, Log_Streams),
 
     {next_state, 'LOGGING', State}.
 

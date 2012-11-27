@@ -21,10 +21,10 @@ init([]) ->
     io:format("CWD: ~p\n", [filename:absname("")]),
 
     io:format("Creating ets tables..."),
-    ets:new(current_connected_users, [named_table, set, public]),
-    ets:new(current_nodes, [named_table, set, public]),
-    ets:new(current_node_streams, [named_table, bag, public]),
-    ets:new(current_roles, [named_table, bag, public]),
+    ets:new(current_connected_users,  [named_table, set, public]),
+    ets:new(current_nodes,            [named_table, set, public]),
+    ets:new(current_log_streams,      [named_table, set, public, {keypos, #log_stream.stream_id}]),
+    ets:new(current_roles,            [named_table, bag, public]),
     io:format(" done!\n"),
 
     io:format("Creating global metrics..."),
@@ -38,7 +38,7 @@ init([]) ->
                             {[<<"css">>, '...'],        http_static_handler, []},
                             {[<<"images">>, '...'],     http_static_handler, []},
                             {[<<"bootstrap">>, '...'],  http_static_handler, []},
-                            {[<<"node">>, '_', <<"log">>, '...'],   http_node_log_handler, []},
+                            {[<<"log">>, '...'],        http_log_handler, []},
                             {[<<"node">>, '_'],         http_node_handler, []},
                             {'_',                       http_catchall_handler, []}
                            ]}],
@@ -52,7 +52,8 @@ init([]) ->
                   {popcorn_udp,    {popcorn_udp,    start_link, []}, permanent, 5000, worker, [popcorn_udp]},
 
                   {connected_user_sup, {supervisor, start_link, [{local, connected_user_sup}, ?MODULE, [connected_user_fsm]]}, permanent, infinity, supervisor, []},
-                  {node_sup,           {supervisor, start_link, [{local, node_sup},           ?MODULE, [node_fsm]]},           permanent, infinity, supervisor, []}
+                  {node_sup,           {supervisor, start_link, [{local, node_sup},           ?MODULE, [node_fsm]]},           permanent, infinity, supervisor, []},
+                  {stream_sup,         {supervisor, start_link, [{local, stream_sup},         ?MODULE, [log_stream_fsm]]},     permanent, infinity, supervisor, []}
                ],
 
     {ok, { {one_for_one, 10000, 10}, Children} };

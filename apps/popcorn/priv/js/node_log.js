@@ -2,6 +2,16 @@ var isVisible = false;
 var clickedAway = false;
 
 $(document).ready(function() {
+  $('.icon-pause').click(function(e) {
+    $.ajax({type:'POST',url:'/node/log/stream/pause/toggle',data:'',
+            success:function(data,textStatus,xhr) {
+              console.log('toggled');
+            },
+            error:function(xhr,textStatus) {
+              alert('Unable to toggle pause state');
+            }});
+    e.preventDefault();
+  });
   $('.close-popover').live('click', function() {
     $('.show-more').popover('hide');
   });
@@ -35,7 +45,8 @@ $(document).ready(function() {
     row.append($('<td />').html(log_message.time));
     row.append($('<td />').html(log_message.message_severity));
     row.append($('<td />').html(log_message.message));
-    $('#log-messages tbody tr:first').before(row);
+
+    $('#log-messages tbody').prepend(row);
 
     // truncate the table to 500 rows // TODO make this less static
     while ($('#log-messages tr').length > 500) {
