@@ -4,6 +4,7 @@
 -behavior(cowboy_http_handler).
 
 -include("include/popcorn.hrl").
+-include_lib("stdlib/include/ms_transform.hrl").
 
 -export([init/3,
          handle/2,
@@ -19,6 +20,21 @@ handle(Req, State) ->
     handle_path(Method, Path_Parts, Req2, State).
 
 terminate(_Req, _State) -> ok.
+
+handle_path(<<"POST">>, [<<"log">>, <<"stream">>, <<"pause">>], Req, State) ->
+    {ok, Vals, _} = cowboy_req:body_qs(Req),
+    Stream_Id     = proplists:get_value(<<"stream_id">>, Vals),
+    Stream_Pid    = lists:nth(1, ets:select(current_log_streams, ets:fun2ms(fun(#log_stream{stream_id  = SID,
+                                                                                            stream_pid = SPID}) when SID =:= Stream_Id -> SPID end))),
+
+    gen_fsm:send_all_state_event(Stream_Pid, toggle_pause),
+
+    %% get the current paused state for the response
+    Is_Paused = gen_fsm:sync_send_all_state_event(Stream_Pid, is_paused),
+    Response  = {struct, [{"is_paused", Is_Paused}]},
+
+    {ok, Reply}   = cowboy_req:reply(200, [{"Content-Type", "application/json"}], lists:flatten(mochijson:encode(Response)), Req),
+    {ok, Reply, State};
 
 handle_path(<<"GET">>, [<<"log">>, <<"stream">>, Stream_Id], Req, State) ->
     Headers      = [{"Content-Type", <<"text/event-stream">>}],

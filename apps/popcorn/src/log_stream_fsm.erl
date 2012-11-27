@@ -21,9 +21,7 @@
     'STARTING'/2,
     'STARTING'/3,
     'STREAMING'/2,
-    'STREAMING'/3,
-    'PAUSED'/2,
-    'PAUSED'/3]).
+    'STREAMING'/3]).
 
 -record(state, {log_stream              :: #log_stream{},
                 idle_loops_disconnected :: integer()}).
@@ -63,12 +61,6 @@ init([]) ->
 'STREAMING'(Other, _From, State) ->
     {noreply, undefined, 'STREAMING', State}.
 
-'PAUSED'(Other, State) ->
-    {next_state, 'PAUSED', State}.
-
-'PAUSED'(Other, _From, State) ->
-    {noreply, undefined, 'PAUSED', State}.
-
 handle_event({new_message, Log_Message}, State_Name, State) ->
     Log_Stream    = State#state.log_stream,
     Should_Stream = Log_Stream#log_stream.paused =:= false andalso
@@ -81,7 +73,17 @@ handle_event({new_message, Log_Message}, State_Name, State) ->
 
     {next_state, State_Name, State};
 
+handle_event(toggle_pause, State_Name, State) ->
+    Log_Stream = State#state.log_stream,
+    New_Log_Stream = Log_Stream#log_stream{paused = not Log_Stream#log_stream.paused},
+    {next_state, State_Name, State#state{log_stream = New_Log_Stream}};
+
 handle_event(Event, StateName, State)                 -> {stop, {StateName, undefined_event, Event}, State}.
+
+handle_sync_event(is_paused, _From, State_Name, State) ->
+    Log_Stream = State#state.log_stream,
+    {reply, Log_Stream#log_stream.paused, State_Name, State};
+
 handle_sync_event(Event, _From, StateName, State)     -> {stop, {StateName, undefined_event, Event}, State}.
 handle_info(_Info, StateName, State)                  -> {next_state, StateName, State}.
 terminate(_Reason, _StateName, State)                 ->

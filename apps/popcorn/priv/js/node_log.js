@@ -3,9 +3,14 @@ var clickedAway = false;
 
 $(document).ready(function() {
   $('.icon-pause').click(function(e) {
-    $.ajax({type:'POST',url:'/node/log/stream/pause/toggle',data:'',
+    var data = 'stream_id=' + encodeURIComponent(streamId);
+    $.ajax({type:'POST',url:'/log/stream/pause',data:data,
             success:function(data,textStatus,xhr) {
-              console.log('toggled');
+              if (data['is_paused']) {
+                $('#log-pause').removeClass('icon-pause').addClass('icon-play');
+              } else {
+                $('#log-pause').removeClass('icon-play').addClass('icon-pause');
+              }
             },
             error:function(xhr,textStatus) {
               alert('Unable to toggle pause state');
