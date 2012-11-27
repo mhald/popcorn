@@ -8,6 +8,9 @@ $(document).ready(function() {
             success:function(data,textStatus,xhr) {
               if (data['is_paused']) {
                 $('#log-pause').removeClass('icon-pause').addClass('icon-play');
+                $('#log-messages tbody').prepend($('<tr />')
+                                                 .append($('<td />').attr('colspan', '4').css('text-align', 'center')
+                                                         .html('Paused...')));
               } else {
                 $('#log-pause').removeClass('icon-play').addClass('icon-pause');
               }
@@ -27,6 +30,18 @@ $(document).ready(function() {
                      $(this).popover('show');
                      e.preventDefault();
                  });
+
+  // select the default filters
+  for (appliedFilter in appliedFilters) {
+    var values = appliedFilters[appliedFilter];
+
+    if (appliedFilter === 'node_names') {
+      for (var i = 0; i < values.length; i++) {
+        var value = values[i];
+        $('.filter-node[data-val=\''+value+'\']').prop('checked', true);
+      }
+    }
+  }
 
   showNewLogMessage = function(log_message) {
     var row = $('<tr />');

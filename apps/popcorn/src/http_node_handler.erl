@@ -22,11 +22,16 @@ terminate(_Req, _State) -> ok.
 
 %% TODO return a 404 if the node isn't found
 handle_path(<<"GET">>, [<<"node">>, Node_Name], Req, State) ->
-    Context     = dict:from_list([{node_name, Node_Name}]),
-    TFun        = mustache:compile(view_node),
-    Output      = mustache:render(view_node, TFun, Context),
-    {ok, Reply} = cowboy_req:reply(200, [], Output, Req),
-    {ok, Reply, State}.
+    case session_handler:is_session_authed_and_valid(Req) of
+        false -> Req1 = cowboy_req:set_resp_cookie(<<"popcorn-session-key">>, <<>>, [{path, "/"}], Req),
+                 {ok, Reply} = cowboy_req:reply(301, [{"Location", "/login"}], [], Req1),
+                 {ok, Reply, State};
+        true  -> Context     = dict:from_list([{node_name, Node_Name}]),
+                 TFun        = mustache:compile(view_node),
+                 Output      = mustache:render(view_node, TFun, Context),
+                 {ok, Reply} = cowboy_req:reply(200, [], Output, Req),
+                 {ok, Reply, State}
+    end.
 
 
 

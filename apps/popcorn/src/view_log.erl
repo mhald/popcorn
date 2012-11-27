@@ -7,6 +7,7 @@
 -export([known_roles/1,
          known_nodes/1,
          known_severities/1,
+         applied_filters/1,
          username/0,
          streaming_url/1]).
 
@@ -50,6 +51,14 @@ known_severities(Context) ->
                   {'filter_state', Filter_State}],
         dict:from_list(Params)
       end, lists:reverse(popcorn_util:all_severity_numbers())).
+
+-spec applied_filters(dict()) -> string().
+applied_filters(Context) ->
+    Default_Filters = dict:to_list(proplists:get_value(default_filters, dict:to_list(Context))),
+    Json = {struct, lists:map(fun({Name, Value}) ->
+                        {atom_to_list(Name), {array, Value}}
+                      end, Default_Filters)},
+    lists:flatten(mochijson:encode(Json)).
 
 -spec username() -> string().
 username() -> "marc".

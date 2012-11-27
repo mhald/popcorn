@@ -2,11 +2,10 @@
 <html>
     <head>
         <title>Popcorn Log Analysis</title>
-        <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600,700' rel='stylesheet' type='text/css'>
         <link rel='stylesheet/less' href="/css/popcorn.less" type="text/css">
         <script src="/js/less.js" type="text/javascript"></script>
         <link href="/css/jquery-ui.css" rel="stylesheet" type="text/css">
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script src="/js/jquery.min.js"></script>
         <script src="/bootstrap/js/bootstrap-dropdown.js"></script>
         <script src="/bootstrap/js/bootstrap-collapse.js"></script>
         <script src="/bootstrap/js/bootstrap-tooltip.js"></script>
@@ -57,7 +56,7 @@
                           </li>
                           <li>
                             {{#known_roles}}
-                            <a href="#" class="nav-filter"><label class="checkbox"><input type="checkbox" class="filter-role" data-val="{{role}}"{{filter_state}}>{{role}}</label></a>
+                            <a href="#" class="nav-filter"><label class="checkbox"><input type="checkbox" class="filter-role" data-val="{{role}}">{{role}}</label></a>
                             {{/known_roles}}
                           </li>
 
@@ -66,7 +65,7 @@
                           </li>
                           <li>
                             {{#known_nodes}}
-                            <a href="#" class="nav-filter"><label class="checkbox"><input type="checkbox" class="filter-node" data-val="{{name}}"{{filter_state}}>{{name}}</label></a>
+                            <a href="#" class="nav-filter"><label class="checkbox"><input type="checkbox" class="filter-node" data-val="{{name}}">{{name}}</label></a>
                             {{/known_nodes}}
                           </li>
 
@@ -75,7 +74,7 @@
                           </li>
                           <li>
                             {{#known_severities}}
-                            <a href="#" class="nav-filter"><label class="checkbox"><input type="checkbox" class="filter-severity" data-val="{{label}}"{{filter_state}}>{{label}}</label></a>
+                            <a href="#" class="nav-filter"><label class="checkbox"><input type="checkbox" class="filter-severity" data-val="{{label}}">{{label}}</label></a>
                             {{/known_severities}}
                           </li>
                         </ul>
@@ -122,6 +121,7 @@
 
       var streamId = "{{stream_id}}";
       var streamSource = new EventSource("{{streaming_url}}")
+      var appliedFilters = {{applied_filters}};
 
       streamSource.onmessage = function(log_message) {
         showNewLogMessage(JSON.parse(log_message.data));

@@ -39,8 +39,10 @@ init([]) ->
     %% add to the ets table
     ets:insert(current_log_streams, Log_Stream),
 
-    {next_state, 'STREAMING', State#state{log_stream = Log_Stream}}.
-
+    {next_state, 'STARTING', State#state{log_stream = Log_Stream}};
+'STARTING'({set_client_pid, Pid}, State) ->
+    Log_Stream = State#state.log_stream,
+    {next_state, 'STREAMING', State#state{log_stream = Log_Stream#log_stream{client_pid = Pid}}}.
 'STARTING'(Other, _From, State) ->
     {noreply, undefined, 'STARTING', State}.
 
@@ -76,6 +78,9 @@ handle_event({new_message, Log_Message}, State_Name, State) ->
 handle_event(toggle_pause, State_Name, State) ->
     Log_Stream = State#state.log_stream,
     New_Log_Stream = Log_Stream#log_stream{paused = not Log_Stream#log_stream.paused},
+
+    %% TODO, update the ets table with the paused state
+
     {next_state, State_Name, State#state{log_stream = New_Log_Stream}};
 
 handle_event(Event, StateName, State)                 -> {stop, {StateName, undefined_event, Event}, State}.
