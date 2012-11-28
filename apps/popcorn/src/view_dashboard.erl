@@ -3,7 +3,8 @@
 
 -include("include/popcorn.hrl").
 
--export([node_count/0,
+-export([head_includes/0,
+         node_count/0,
          event_count/0,
          hashtag_count/0,
          mention_count/0,
@@ -11,6 +12,9 @@
          alert_count/0,
          known_nodes/0,
          username/0]).
+
+-spec head_includes() -> list().
+head_includes() -> popcorn_util:head_includes().
 
 -spec node_count() -> integer().
 node_count() -> length(ets:tab2list(current_nodes)).

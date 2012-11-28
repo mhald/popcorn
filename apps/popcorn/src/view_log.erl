@@ -4,12 +4,16 @@
 -include_lib("stdlib/include/ms_transform.hrl").
 -include("include/popcorn.hrl").
 
--export([known_roles/1,
+-export([head_includes/0,
+         known_roles/1,
          known_nodes/1,
          known_severities/1,
          applied_filters/1,
          username/0,
          streaming_url/1]).
+
+-spec head_includes() -> list().
+head_includes() -> popcorn_util:head_includes().
 
 -spec known_roles(dict()) -> list().
 known_roles(Context) ->

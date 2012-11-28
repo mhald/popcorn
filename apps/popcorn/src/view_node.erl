@@ -3,7 +3,8 @@
 
 -include("include/popcorn.hrl").
 
--export([debug_event_counts/1,
+-export([head_includes/0,
+         debug_event_counts/1,
 				 info_event_counts/1,
 			 	 notice_event_counts/1,
 			   warn_event_counts/1,
@@ -13,6 +14,9 @@
 				 emergency_event_counts/1,
          username/0,
          current_node_name/1]).
+
+-spec head_includes() -> list().
+head_includes() -> popcorn_util:head_includes().
 
 -spec debug_event_counts(dict()) -> list().
 debug_event_counts(Context) -> event_counts(mustache:get(node_name, Context), 7).

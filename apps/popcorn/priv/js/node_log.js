@@ -2,6 +2,10 @@ var isVisible = false;
 var clickedAway = false;
 
 $(document).ready(function() {
+  $('.filter-severity').click(function(e) {
+    e.preventDefault();
+  });
+
   $('.icon-pause').click(function(e) {
     var data = 'stream_id=' + encodeURIComponent(streamId);
     $.ajax({type:'POST',url:'/log/stream/pause',data:data,

@@ -10,7 +10,8 @@
          all_severity_numbers/0,
          random_id/0,
          format_log_message/1,
-         opt/2]).
+         opt/2,
+         head_includes/0]).
 
 hour() -> integer_to_list(erlang:trunc(folsom_utils:now_epoch() / 3600)).
 
@@ -80,3 +81,13 @@ format_log_message(Log_Message) ->
    {'log_pid',          opt(binary_to_list(Log_Message#log_message.log_pid), "?")},
    {'message_severity', binary_to_list(popcorn_util:number_to_severity(Log_Message#log_message.severity))},
    {'message',          binary_to_list(Log_Message#log_message.message)}].
+
+head_includes() ->
+    Head_Includes = ["<link rel='stylesheet/less' href=\"/css/popcorn.less\" type=\"text/css\">",
+                     "<script src=\"/js/less.js\" type=\"text/javascript\"></script>"],
+
+    lists:map(fun(Include) ->
+        dict:from_list([{'tag', Include}])
+      end, Head_Includes).
+
+

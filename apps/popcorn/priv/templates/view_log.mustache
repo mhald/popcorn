@@ -2,10 +2,11 @@
 <html>
     <head>
         <title>Popcorn Log Analysis</title>
-        <link rel='stylesheet/less' href="/css/popcorn.less" type="text/css">
-        <script src="/js/less.js" type="text/javascript"></script>
-        <link href="/css/jquery-ui.css" rel="stylesheet" type="text/css">
+        {{#head_includes}}
+          {{tag}}
+        {{/head_includes}}
         <script src="/js/jquery.min.js"></script>
+        <script src="/js/history.js/scripts/bundled/html4+html5/jquery.history.js"></script>
         <script src="/bootstrap/js/bootstrap-dropdown.js"></script>
         <script src="/bootstrap/js/bootstrap-collapse.js"></script>
         <script src="/bootstrap/js/bootstrap-tooltip.js"></script>
@@ -85,8 +86,9 @@
                 <div id="content">
 
                   <header>
-                    <h1>Logs
-                      <div style="float:right;padding-right:36px;">
+                  <h1>Logs
+                    <div style="float:right;padding-right:36px;">
+                        <span class="label label-important" id="disconnected" style="display:none;">Disconnected</span>
                         <a class="btn btn-mini" href="#"><i class="icon-pause" data-toggle="button" id="log-pause"></i></a>
                       </div>
                     </h1>
@@ -125,7 +127,11 @@
 
       streamSource.onmessage = function(log_message) {
         showNewLogMessage(JSON.parse(log_message.data));
-      }
+      };
+      streamSource.onerror = function(error) {
+        $('#disconnected').show();
+      };
+
     </script>
   </body>
 </html>

@@ -22,7 +22,7 @@ handle(Req, State) ->
 
         {{<<"GET">>, _}, {<<"/login">>, _}} ->
             ?POPCORN_DEBUG_MSG("http request for login page"),
-            Output = mustache:render(popcorn, ?MUSTACHE("login.mustache"), dict:from_list([])),
+            Output = mustache:render(view_login),
             {ok, Reply} = cowboy_req:reply(200, [], Output, Req),
             {ok, Reply, State};
 
