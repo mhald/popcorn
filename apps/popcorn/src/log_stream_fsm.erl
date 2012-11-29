@@ -5,7 +5,7 @@
 -include("include/popcorn.hrl").
 -include_lib("stdlib/include/ms_transform.hrl").
 
--define(IDLE_DISCONNECT_TIMER,      60000).
+-define(IDLE_DISCONNECT_TIMER,      5000).
 
 -export([start_link/0]).
 
@@ -41,8 +41,12 @@ init([]) ->
 
     {next_state, 'STARTING', State#state{log_stream = Log_Stream}};
 'STARTING'({set_client_pid, Pid}, State) ->
-    Log_Stream = State#state.log_stream,
-    {next_state, 'STREAMING', State#state{log_stream = Log_Stream#log_stream{client_pid = Pid}}}.
+    Log_Stream  = State#state.log_stream,
+    Log_Stream2 = lists:nth(1, ets:select(current_log_streams, ets:fun2ms(fun(Log_Stream3) when Log_Stream3#log_stream.stream_id =:= Log_Stream#log_stream.stream_id -> Log_Stream3 end))),
+    Log_Stream3 = Log_Stream2#log_stream{client_pid = Pid},
+    ets:insert(current_log_streams, Log_Stream3),
+
+    {next_state, 'STREAMING', State#state{log_stream = Log_Stream3}}.
 'STARTING'(Other, _From, State) ->
     {noreply, undefined, 'STARTING', State}.
 
@@ -57,6 +61,21 @@ init([]) ->
                      O -> {next_state, 'STREAMING', State#state{idle_loops_disconnected = O + 1}}
                  end
     end;
+'STREAMING'({update_severities, New_Severities}, State) ->
+    Severity_Filter = lists:map(fun(S) -> list_to_integer(S) end, string:tokens(binary_to_list(New_Severities), ",")),
+    Log_Stream      = State#state.log_stream,
+    Applied_Filters = Log_Stream#log_stream.applied_filters,
+
+    Applied_Filters2 = case proplists:get_value('severities', Applied_Filters) of
+                           undefined -> Applied_Filters ++ [{'severities', Severity_Filter}];
+                           _         -> proplists:delete('severities', Applied_Filters) ++ [{'severities', Severity_Filter}]
+                       end,
+
+    update_filters(Applied_Filters2, Log_Stream#log_stream.stream_id),
+
+    Log_Stream2 = Log_Stream#log_stream{applied_filters = Applied_Filters2},
+
+    {next_state, 'STREAMING', State#state{log_stream = Log_Stream2}};
 'STREAMING'(Other, State) ->
     {next_state, 'STREAMING', State}.
 
@@ -97,5 +116,11 @@ terminate(_Reason, _StateName, State)                 ->
     ok.
 code_change(_OldVsn, StateName, StateData, _Extra)    -> {ok, StateName, StateData}.
 
+update_filters(Applied_Filters, Stream_Id) ->
+    Log_Stream = lists:nth(1, ets:select(current_log_streams, ets:fun2ms(fun(Log_Stream2) when Log_Stream2#log_stream.stream_id =:= Stream_Id -> Log_Stream2 end))),
+    Log_Stream2 = Log_Stream#log_stream{applied_filters = Applied_Filters},
+    ets:insert(current_log_streams, Log_Stream2).
 
-is_filtered_out(Log_Message, Filters) -> false.
+is_filtered_out(Log_Message, Filters) ->
+    Severity_Restricted = not lists:member(Log_Message#log_message.severity, proplists:get_value('severities', Filters, [])),
+    Severity_Restricted.

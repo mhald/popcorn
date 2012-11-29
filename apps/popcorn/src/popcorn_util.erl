@@ -4,6 +4,7 @@
 -include("include/popcorn.hrl").
 
 -export([hour/0,
+         retention_time_to_microsec/1,
          last_24_hours/0,
          severity_to_number/1,
          number_to_severity/1,
@@ -14,6 +15,14 @@
          head_includes/0]).
 
 hour() -> integer_to_list(erlang:trunc(folsom_utils:now_epoch() / 3600)).
+
+seconds_to_microseconds(Seconds) -> Seconds * 1000000.
+
+retention_time_to_microsec({minutes, Minutes}) -> seconds_to_microseconds(Minutes * 60);
+retention_time_to_microsec({hours, Hours})     -> retention_time_to_microsec({minutes, Hours * 60});
+retention_time_to_microsec({days, Days})       -> retention_time_to_microsec({hours, Days * 24});
+retention_time_to_microsec({weeks, Weeks})     -> retention_time_to_microsec({days, Weeks * 7});
+retention_time_to_microsec({months, Months})   -> retention_time_to_microsec({weeks, Months * 4}).
 
 last_24_hours() ->
     lists:map(fun(Hours_Ago) ->

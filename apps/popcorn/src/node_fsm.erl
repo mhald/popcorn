@@ -18,7 +18,6 @@
     'LOGGING'/2,
     'LOGGING'/3]).
 
--define(MAX_RETENTION_MICRO, 12 * 60 * 60 * 1000000).  %% 12 hours
 -define(EXPIRE_TIMER,        15000).
 
 -record(state, {history_name          :: atom(),
@@ -36,10 +35,13 @@ init([]) ->
     {ok, 'LOGGING', #state{}}.
 
 'LOGGING'({timeout, _From, expire_log_messages}, State) ->
-    Oldest_Timestamp = ?NOW - ?MAX_RETENTION_MICRO,
-
-    %% TODO, removed this because it's causing too many records to be deleted...  this should be configurable also...
-    %Purged_Records = ets:select_delete(State#state.history_name, ets:fun2ms(fun(#log_message{timestamp = TS}) when TS < Oldest_Timestamp -> true end)),
+    {ok, Retentions} = application:get_env(popcorn, log_retention),
+    lists:foreach(fun({Severity, Retention_Interval}) ->
+        Microseconds = popcorn_util:retention_time_to_microsec(Retention_Interval),
+        Oldest_TS    = ?NOW - Microseconds,
+        Severity_Num = popcorn_util:severity_to_number(Severity),
+        ets:select_delete(State#state.history_name, ets:fun2ms(fun(#log_message{timestamp = TS, severity  = S}) when TS < Oldest_TS andalso S =:= Severity_Num -> true end))
+      end, Retentions),
 
     gen_fsm:start_timer(?EXPIRE_TIMER, expire_log_messages),
 

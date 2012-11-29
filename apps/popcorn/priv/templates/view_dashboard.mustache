@@ -43,19 +43,13 @@
                     <nav>
                         <ul class="nav">
                           <li class="selected">
-                            <a href="/"><i class="icon-play"></i> Dashboard</a>
+                            <a href="#dashboard"><i class="icon-list"></i> Dashboard</a>
                           </li>
                           <li>
-                            <a href="/search"><i class="icon-th-list icon-white"></i> Search</a>
+                            <a href="#alerts"><i class="icon-bell icon-white"></i> Alerts</a>
                           </li>
                           <li>
-                            <a href="/alerts"><i class="icon-font icon-white"></i> Alerts</a>
-                          </li>
-                          <li>
-                            <a href="/roles"><i class="icon-user icon-white"></i> Roles</a>
-                          </li>
-                          <li>
-                            <a href="/nodes"><i class="icon-retweet icon-white"></i> Nodes</a>
+                            <a href="#nodes"><i class="icon-th-large icon-white"></i> Nodes</a>
                           </li>
                         </ul>
                     </nav>
@@ -67,12 +61,11 @@
                     <!-- Navbar
                     ================================================== -->
                     <section id="stats">
-                      <header>
-                        <div class="pull-right">
-                            <a class="btn btn-small">Filter</a>
-                        </div>
-                        <h1>Dashboard</h1>
-                      </header>
+                      <a name="dashboard">
+                        <header>
+                          <h1>Dashboard</h1>
+                        </header>
+                      </a>
                       <div class="row-fluid">
                         <div class="span2">
                             <div class="kpi">{{node_count}}</div>
@@ -100,15 +93,25 @@
                     </div>
                   </div>
                 </section>
-                <!-- Graph
+                <!-- Dashboard
                 ================================================== -->
 
-                <!-- Tables
+                <section id="alerts">
+                  <a name="alerts">
+                    <header>
+                      <h1>Alerts</h1>
+                    </header>
+                  </a>
+                </section>
+
+                <!-- Nodes
                 ================================================== -->
-                <section id="tables">
-                  <div class="sub-header">
-                    <h2>Tables</h2>
-                  </div>
+                <section id="nodes">
+                  <a name="nodes">
+                    <header>
+                      <h1>Nodes</h1>
+                    </header>
+                  </a>
                   <table class="table table-striped full-section table-hover">
                     <thead>
                       <tr>

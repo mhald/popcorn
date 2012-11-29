@@ -16,43 +16,27 @@
 head_includes() -> popcorn_util:head_includes().
 
 -spec known_roles(dict()) -> list().
-known_roles(Context) ->
+known_roles(_) ->
     Role_Names        = lists:map(fun({Name, _}) -> Name end, ets:tab2list(current_roles)),
     Unique_Role_Names = sets:to_list(sets:from_list(Role_Names)),
     lists:map(fun(Role_Name) ->
-        Params = [{'role',         binary_to_list(Role_Name)},
-                  {'filter_state', ""}],
+        Params = [{'role',         binary_to_list(Role_Name)}],
         dict:from_list(Params)
       end, Unique_Role_Names).
 
 -spec known_nodes(dict()) -> list().
-known_nodes(Context) ->
-    Default_Filters = dict:to_list(proplists:get_value(default_filters, dict:to_list(Context))),
-    Filtered_On_Nodes = proplists:get_value('node_names', Default_Filters, []),
-
+known_nodes(_) ->
     Node_Names = lists:map(fun({Name, _}) -> Name end, ets:tab2list(current_nodes)),
     lists:map(fun(Node_Name) ->
-        Filter_State = case lists:member(Node_Name, Filtered_On_Nodes) of
-                           false -> "";
-                           true  -> " checked"
-                       end,
-        Params = [{'name',         binary_to_list(Node_Name)},
-                  {'filter_state', Filter_State}],
+        Params = [{'name',         binary_to_list(Node_Name)}],
         dict:from_list(Params)
       end, Node_Names).
 
 -spec known_severities(dict()) -> list().
-known_severities(Context) ->
-    Default_Filters = dict:to_list(proplists:get_value(default_filters, dict:to_list(Context))),
-    Filtered_On_Severities = proplists:get_value('severities', Default_Filters, []),
-
+known_severities(_) ->
     lists:map(fun(Severity_Number) ->
-        Filter_State = case lists:member(Severity_Number, Filtered_On_Severities) of
-                           false -> "";
-                           true  -> " checked"
-                       end,
         Params = [{'label',        binary_to_list(popcorn_util:number_to_severity(Severity_Number))},
-                  {'filter_state', Filter_State}],
+                  {'severity_num', integer_to_list(Severity_Number)}],
         dict:from_list(Params)
       end, lists:reverse(popcorn_util:all_severity_numbers())).
 

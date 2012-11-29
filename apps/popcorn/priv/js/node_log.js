@@ -2,8 +2,36 @@ var isVisible = false;
 var clickedAway = false;
 
 $(document).ready(function() {
+  updateHistoryState = function() {
+    var cleanUrl = History.getState().cleanUrl;
+    var params = [];
+    if (appliedFilters['node_names'].length > 0) {
+      params.push('nodes=' + encodeURIComponent(appliedFilters['node_names']));
+    }
+    if (appliedFilters['severities'].length > 0) {
+      params.push('severities=' + appliedFilters['severities']);
+    }
+
+    History.pushState({}, '', '?' + params.join('&'));
+  };
+
   $('.filter-severity').click(function(e) {
-    e.preventDefault();
+    var severitiesOn = [];
+    $.each($('.filter-severity'), function(k, v) {
+      if ($(v).prop('checked')) {
+        severitiesOn.push(parseInt($(this).attr('data-val')));
+      }
+    });
+
+    appliedFilters['severities'] = severitiesOn;
+    updateHistoryState();
+
+    $.ajax({type:'PUT',url:'/log/stream/' + streamId,
+            data:'severities=' + severitiesOn,
+            success:function() { },
+            error:function() {
+              alert('Unable to update filter');
+            }});
   });
 
   $('.icon-pause').click(function(e) {
@@ -43,6 +71,11 @@ $(document).ready(function() {
       for (var i = 0; i < values.length; i++) {
         var value = values[i];
         $('.filter-node[data-val=\''+value+'\']').prop('checked', true);
+      }
+    } else if (appliedFilter === 'severities') {
+      for (var i = 0; i < values.length; i++) {
+        var value = values[i];
+        $('.filter-severity[data-val=\''+value+'\']').prop('checked', true);
       }
     }
   }
