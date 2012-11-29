@@ -45,6 +45,9 @@ $(document).ready(function() {
                                                          .html('Paused...')));
               } else {
                 $('#log-pause').removeClass('icon-play').addClass('icon-pause');
+                $('#log-messages tbody').prepend($('<tr />')
+                                                 .append($('<td />').attr('colspan', '4').css('text-align', 'center')
+                                                         .html('Resumed')));
               }
             },
             error:function(xhr,textStatus) {
