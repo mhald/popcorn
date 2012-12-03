@@ -20,13 +20,23 @@
   the user authentication policy.  Possible options in the config are:
 
 #+BEGIN EXAMPLE
+```erlang
   {popcorn, [
         {udp_listen_port, 9125},
         {http_listen_port, 9125},
         {http_auth_enabled, true},
         {http_auth_db_type, config},
-        {http_auth_users, [{<<"log_user">>, <<"log_password">>}]}
+        {http_auth_users, [{<<"log_user">>, <<"log_password">>}]},
+        {log_retention, [{<<"debug">>,      {hours, 2}},
+                         {<<"info">>,       {hours, 2}},
+                         {<<"notice">>,     {hours, 2}},
+                         {<<"warn">>,       {hours, 2}},
+                         {<<"error">>,      {months, 1}},
+                         {<<"critical">>,   {months, 1}},
+                         {<<"alert">>,      {months, 1}},
+                         {<<"emergency">>,  {months, 1}}]}
         ]} 
+```
 #+END EXAMPLE
 
 * Requirements
