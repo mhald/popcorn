@@ -16,7 +16,7 @@ handle(Req, State) ->
         {{<<"GET">>, _}, {<<"/logout">>, _}} ->
             ?POPCORN_DEBUG_MSG("http request for logout page"),
             Output = mustache:render(popcorn, ?MUSTACHE("logout.mustache"), dict:from_list([])),
-            Req1 = cowboy_req:set_resp_cookie(<<"popcorn-session-key">>, <<>>, [{path, "/"}], Req),
+            Req1 = cowboy_req:set_resp_cookie(<<"popcorn-session-key">>, <<>>, [{path, <<"/">>}], Req),
             {ok, Reply} = cowboy_req:reply(200, [], Output, Req1),
             {ok, Reply, State};
 
@@ -28,14 +28,14 @@ handle(Req, State) ->
 
         {{<<"POST">>, _}, {<<"/api/v1/login">>, _}} ->
             ?POPCORN_DEBUG_MSG("http api login"),
-            {ok, Post_Vals, Req2} = cowboy_req:body_qs(Req),
+            {ok, Post_Vals, _Req2} = cowboy_req:body_qs(Req),
             Username = proplists:get_value(<<"username">>, Post_Vals),
             Password = proplists:get_value(<<"password">>, Post_Vals),
 
             case session_handler:try_start_authed_session("", Username, Password) of
                 {error, Message}  -> {ok, Reply} = cowboy_req:reply(401, [], Message, Req),
                                      {ok, Reply, State};
-                {ok, Session_Key} -> Req1 = cowboy_req:set_resp_cookie(<<"popcorn-session-key">>, Session_Key, [{path, "/"}], Req),
+                {ok, Session_Key} -> Req1 = cowboy_req:set_resp_cookie(<<"popcorn-session-key">>, Session_Key, [{path, <<"/">>}], Req),
                                      {ok, Reply} = cowboy_req:reply(200, [], <<>>, Req1),
                                      {ok, Reply, State}
             end;
@@ -43,7 +43,7 @@ handle(Req, State) ->
         {{<<"GET">>, _}, {<<"/">>, _}} ->
             ?POPCORN_DEBUG_MSG("http request for dashboard"),
             case session_handler:is_session_authed_and_valid(Req) of
-                false -> Req1 = cowboy_req:set_resp_cookie(<<"popcorn-session-key">>, <<>>, [{path, "/"}], Req),
+                false -> Req1 = cowboy_req:set_resp_cookie(<<"popcorn-session-key">>, <<>>, [{path, <<"/">>}], Req),
                          {ok, Reply} = cowboy_req:reply(301, [{"Location", "/login"}], [], Req1),
                          {ok, Reply, State};
                 true  -> Output = mustache:render(view_dashboard),
