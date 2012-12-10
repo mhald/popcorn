@@ -63,7 +63,7 @@ handle_path(<<"PUT">>, [<<"log">>, <<"stream">>, Stream_Id], Req, State) ->
 %% convienence entry points to allow the user to pre-define the filters
 handle_path(<<"GET">>, [<<"log">>], Req, State) ->
     case session_handler:is_session_authed_and_valid(Req) of
-        false -> Req1 = cowboy_req:set_resp_cookie(<<"popcorn-session-key">>, <<>>, [{path, "/"}], Req),
+        false -> Req1 = cowboy_req:set_resp_cookie(<<"popcorn-session-key">>, <<>>, [{path, <<"/">>}], Req),
                  {ok, Reply} = cowboy_req:reply(301, [{"Location", "/login"}], [], Req1),
                  {ok, Reply, State};
         true  -> {Nodes_Param, _}      = cowboy_req:qs_val(<<"nodes">>, Req, <<>>),
